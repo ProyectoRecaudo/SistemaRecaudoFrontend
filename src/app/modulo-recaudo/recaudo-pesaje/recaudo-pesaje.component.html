@@ -1,0 +1,274 @@
+<div class="main-content">
+    <div class="container-fluid">
+        <div class="col-sm-12">
+            <!-- Vista principal de las opciones de pesaje -->
+            <div class="card " *ngIf="mostrarForm && mostrarHistorico">
+                <div class="card-header card-header-danger">
+                    <h3 class="card-title text-center">Recaudo Pesaje</h3>
+                    <p class="card-category text-center">Sección de Recibo de Pesaje</p>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row mt-5">
+                        <div class="col-md-6 ">
+                            <div class="card card-chart">
+                                <div class="card-header card-header-primary" data-header-animation="true">
+                                    <h3 class="card-title text-center">Recibos Pesaje <i class="material-icons ">description</i></h3>
+                                    <p class="card-category"></p>
+                                </div>
+                                <div class="card-body ">
+                                    <div class="card-actions">
+                                        <button mat-raised-button class="btn btn-outline-primary col-8 mx-auto" (click)="mostrarHistorico= !mostrarHistorico">
+                                            Ver histórico <i class="material-icons">remove_red_eye</i></button>
+
+                                    </div>
+                                    <h4 class="card-title text-center">Consultar el hisórico de recibos</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 ">
+                            <div class="card card-chart">
+                                <div class="card-header card-header-info" data-header-animation="true">
+                                    <h3 class="card-title text-center">Nuevo Recibo Pesaje <i class="material-icons ">credit_card</i></h3>
+                                    <p class="card-category"></p>
+                                </div>
+                                <div class="card-body ">
+                                    <div class="card-actions">
+
+                                        <button mat-raised-button class="btn btn-outline-primary col-8 mx-auto" (click)="mostrarForm= !mostrarForm">
+                                            Nuevo recibo <i class="material-icons">control_point</i>
+                                        </button>
+
+                                    </div>
+                                    <h4 class="card-title text-center">Crear un nuevo recibo de pesaje </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!--FIN Vista principal de las opciones de pesaje -->
+
+            <!--
+                Vista Formulario recaudo de pesaje
+            -->
+            <div class="card" *ngIf="!mostrarForm">
+                <div class="card-header card-header-danger">
+                    <h3 class="card-title text-center">Recaudo Pesaje</h3>
+                </div>
+
+                <div class="card-body">
+
+
+
+                    <!--Mensaje de confirmacion  creacion recibo-->
+                    <div data-notify="container" *ngIf="mensajecreacion" [class]="claseDinamic">
+                        <i class="material-icons" data-notify="icon">{{iconAlert}}</i>
+                        <button mat-button type="button" class="close" aria-label="Close" (click)="mensajecreacion=''">
+                            <i class="material-icons">close</i>
+                        </button>
+                        <span data-notify="message">
+                            <b>Info:</b> {{mensajecreacion}} </span>
+                    </div>
+                    <!--Fin mensajecreacion de confirmacion creacion recibo-->
+
+                    <!--Mensaje de confirmacion-->
+                    <div data-notify="container" *ngIf="mensajedatos" class="alert alert-warning alert-with-icon">
+                        <i class="material-icons" data-notify="icon">warning</i>
+                        <button mat-button type="button" class="close" aria-label="Close" (click)="mensajedatos=''">
+                            <i class="material-icons">close</i>
+                        </button>
+                        <span data-notify="message">
+                            <b>Info:</b> {{mensajedatos}} </span>
+                    </div>
+
+                    <!--
+                        Boton regresar
+                    -->
+                    <div class="row">
+
+                        <button mat-raised-button type="button" class="btn btn-primary btn-link" (click)='mostrarForm= !mostrarForm'>
+                            <span class="btn-label">
+                                <i class="material-icons">keyboard_arrow_left</i>
+                            </span>
+                            Volver
+
+                        </button>
+                    </div>
+                    <form [formGroup]="nuevoReciboForm" (ngSubmit)="guardarRecibo()">
+
+                        <div class="row">
+                            <mat-form-field class="col-md-6 ml-auto mr-auto size-field text-center">
+                                <input matInput placeholder="Nº Recibo" readonly formControlName="numerorecibopesaje" type="number">
+                                <!-- [value]="nrecibo" -->
+                                <mat-icon matSuffix>line_style</mat-icon>
+                            </mat-form-field>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 ml-auto mr-auto">
+                                <mat-form-field>
+                                    <mat-select id="fkidplaza" name="fkidplaza" formControlName="fkidplaza" (selectionChange)="consultarTarifa($event.value,'tarifapesaje')">
+                                        <mat-option [value]='consulta["pkidplaza"]' *ngFor="let consulta of consultas['plaza']">{{consulta['nombreplaza']}}</mat-option>
+                                    </mat-select>
+                                    <mat-label>
+                                        <mat-icon>location_city</mat-icon> Seleccione la plaza
+                                    </mat-label>
+                                    <mat-hint>Seleccione la plaza para buscar la tarifa asignada</mat-hint>
+                                    <mat-error *ngIf="nuevoReciboForm.get('fkidplaza').hasError('required')">La plaza es
+                                        obligatoria
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-md-6 ml-auto mr-auto">
+                                <mat-form-field class="">
+                                    <input matInput placeholder="Tarfifa Pesaje" type="number" readonly formControlName="valortarifa">
+                                    <mat-icon matSuffix>local_atm</mat-icon>
+                                    <mat-hint>
+                                        {{msjhinttarifa}}
+                                    </mat-hint>
+                                    <mat-error>
+                                        <div *ngIf="nuevoReciboForm.get('valortarifa').hasError('required')">
+                                            La tarifa es obligatoria
+                                        </div>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2">
+                            <mat-form-field class="col-md-6 " (focusout)="consultarTercero($event.target.value)">
+                                <input matInput placeholder="Digite cédula tercero" type="number" formControlName='identificacionterceropesaje' (input)='reiniciarTercero()'>
+                                <mat-icon matSuffix>view_compact</mat-icon>
+                                <mat-hint>{{msjhinttercero}}</mat-hint>
+                            </mat-form-field>
+                            <mat-form-field class="col-md-6 ">
+                                <input matInput placeholder="Nombre tercero" formControlName='nombreterceropesaje'>
+                                <mat-icon matSuffix>person</mat-icon>
+                                <mat-error *ngIf="nuevoReciboForm.get('nombreterceropesaje').hasError('required')">El nombre
+                                    es requerido</mat-error>
+                            </mat-form-field>
+
+
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-4 ">
+                                <mat-form-field>
+                                    <mat-select id="fkidtipoanimal" name="fkidtipoanimal" formControlName="fkidtipoanimal" (selectionChange)='consultarEspecieAnimal($event.value)'>
+                                        <mat-option [value]='consulta["pkidtipoanimal"]' *ngFor="let consulta of consultas['tipoanimal']">{{consulta['nombretipoanimal']}}</mat-option>
+                                    </mat-select>
+                                    <mat-label>
+                                        <mat-icon>pets</mat-icon>Seleccione Tipo animal
+                                    </mat-label>
+                                    <mat-error *ngIf="nuevoReciboForm.get('fkidtipoanimal').hasError('required')">El tipo
+                                        de animal es requerido</mat-error>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-md-4 ">
+                                <mat-form-field>
+                                    <mat-select id="fkidespecieanimal" name="fkidespecieanimal" formControlName="fkidespecieanimal">
+                                        <mat-option [value]='consulta["pkidespecieanimal"]' *ngFor="let consulta of consultas['especieanimal']">{{consulta['nombreespecieanimal']}}</mat-option>
+                                    </mat-select>
+                                    <mat-label>
+                                        <mat-icon>pets</mat-icon> Seleccione la especie de animal
+                                    </mat-label>
+                                    <mat-error *ngIf="nuevoReciboForm.get('fkidespecieanimal').hasError('required')">La especie
+                                        animal es requerida</mat-error>
+                                    <mat-hint> {{msjhintespecie}} </mat-hint>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-md-4 ">
+                                <mat-form-field>
+                                    <mat-select id="fkidcategoriaanimal" name="fkidcategoriaanimal" formControlName="fkidcategoriaanimal">
+                                        <mat-option [value]='consulta["pkidcategoriaanimal"]' *ngFor="let consulta of consultas['categoriaanimal']">{{consulta['nombrecategoriaanimal']}}</mat-option>
+                                    </mat-select>
+                                    <mat-label>
+                                        <mat-icon>pets</mat-icon> Seleccione categoria animal
+                                    </mat-label>
+                                    <mat-error *ngIf="nuevoReciboForm.get('fkidcategoriaanimal').hasError('required')">La
+                                        categoria es obligatoria</mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <mat-form-field class="col-md-6 ">
+                                <input matInput placeholder="Peso animal" type="number" formControlName='pesoanimal'>
+                                <span matSuffix>Kg</span>
+                                <mat-error *ngIf="nuevoReciboForm.get('pesoanimal').hasError('required')">El peso animal
+                                    es obligatorio</mat-error>
+                            </mat-form-field>
+                            <mat-form-field class="col-md-6">
+                                <input matInput placeholder="Valor a pagar" type="number" (input)='conversionTextual($event.target.value)' formControlName='valorrecibopesaje'>
+                                <span matPrefix>$&nbsp;</span>
+                                <mat-error *ngIf="nuevoReciboForm.get('valorrecibopesaje').hasError('required')">El valor
+                                    a pagar es obligatorio</mat-error>
+                            </mat-form-field>
+
+                        </div>
+
+                        <div class="row mt-2">
+                            <mat-form-field class="col-md-10 ml-auto mr-auto size-field-m text-center">
+                                <input matInput placeholder="Valor en letras" readonly [value]="textovalor">
+                            </mat-form-field>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-row">
+                                <!-- <div class="col-sm-6 mx-auto"> -->
+                                <button class="btn btn-outline-primary col-sm-4 mx-auto" (click)=" mostrarModal() " [disabled]="!nuevoReciboForm.valid">Crear
+                                    Recibo
+                                </button>
+                                <!-- </div> -->
+                                <!-- <div class="col-sm-6 mx-auto "> -->
+                                <button class="btn btn-outline-primary col-sm-4 mx-auto" (click)="mostrarForm= !mostrarForm">Regresar</button>
+                                <!-- </div> -->
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+
+            <!--FIN
+                Vista Formulario recaudo de pesaje
+            -->
+
+            <!--Historico de recaudo pesaje-->
+            <div *ngIf="!mostrarHistorico">
+                <app-historicos-pesaje (ocultar)='mostrarHistorico= !mostrarHistorico' > </app-historicos-pesaje>
+            </div>
+            <!--FIN Historico de recaudo pesaje-->
+
+        </div>
+    </div>
+</div>
+
+<div *ngIf="datosmodal.length!=0">
+    <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <!-- <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div> -->
+                <div class="modal-body">
+                    <app-modal-confirmacion [datos]='datosmodal'></app-modal-confirmacion>
+                    <div [hidden]="!creandorecibo">
+                        Creando recibo
+                        <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" (click)="crearRecibo()">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

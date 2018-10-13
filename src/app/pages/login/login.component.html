@@ -1,0 +1,70 @@
+<div class="wrapper wrapper-full-page">
+  <div class="page-header login-page header-filter" filter-color="black" style="background-image: url('./assets/img/recaudo2.jpg'); background-size: contain; background-position: top center; background-repeat:no-repeat;">
+    <!--   you can change the color of the filter page using: data-color="blue | purple | green | orange | red | rose " -->
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 col-md-6 col-sm-6 ml-auto mr-auto">
+
+          <form [formGroup]="identificacionForm" (ngSubmit)="identificarUsuario()">
+            <div class="card card-login card-hidden">
+              <div class="card-header card-header-rose text-center">
+                <h4 class="card-title">Inicio de Sesión</h4>
+                <h6 class="card-category"> Inicia sesión para ingresar al sistema </h6>
+              </div>
+              <div class="card-body ">
+                <!--mensajes de error-->
+                <div [class]="claseDinamic" data-notify="container" *ngIf="msg">
+                  <i class="material-icons" data-notify="icon">{{iconAlert}}</i>
+                  <button mat-button type="button" class="close" aria-label="Close" (click)="closeDialog()">
+                    <i class="material-icons">close</i>
+                  </button>
+                  <span data-notify="message">
+                    <b>Info:</b> {{msg}} </span>
+                </div>
+                <mat-progress-bar mode="indeterminate" class="mt-2 mb-4" [hidden]="!logeandose"></mat-progress-bar>
+                <!--fin mensajes de error-->
+                <!--Inicio de formulario de inicio de sesion-->
+
+
+                <mat-form-field class="example-full-width mr-2 ml-2 mb-2">
+                  <input matInput type="number" class="form-control" placeholder="Digite Identificación" id="identificacionUsuario" name="identificacionUsuario"
+                    formControlName="identificacionUsuario">
+                  <mat-icon matSuffix>sentiment_very_satisfied</mat-icon>
+                  <mat-error *ngIf="identificacionForm.get('identificacionUsuario').hasError('required')">
+                    La identificación es <strong>requerida</strong>
+                  </mat-error>
+                </mat-form-field>
+
+
+                <mat-form-field class="example-full-width mr-2 ml-2">
+                  <input matInput type="password" class="form-control" placeholder="Digite contraseña" id="contraseniaUsuario" name="contraseniaUsuario"
+                    formControlName="contraseniaUsuario">
+                  <mat-icon matSuffix>lock</mat-icon>
+
+                  <mat-error *ngIf="identificacionForm.get('contraseniaUsuario').hasError('required')">
+                    La contraseña es <strong>obligatoria</strong>
+                  </mat-error>
+                </mat-form-field>
+
+              </div>
+              <div class="card-footer justify-content-center">
+                <button mat-button class="btn btn-rose btn-link btn-lg" type="submit" [disabled]="!identificacionForm.valid || this.identity!=null ">Iniciar
+                  sesión
+                </button>
+              </div>
+            </div>
+          </form>
+          <!--Fin formulario-->
+        </div>
+      </div>
+    </div>
+    <footer class="footer ">
+      <!-- <div class="container">
+        <div class="copyright pull-right">
+          &copy; {{test | date: 'yyyy'}}, made with <i class="material-icons">favorite</i> by
+          <a href="https://www.creative-tim.com" target="_blank">Creative Tim</a> for a better web.
+        </div>
+      </div> -->
+    </footer>
+  </div>
+</div>

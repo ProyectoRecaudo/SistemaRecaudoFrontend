@@ -1,0 +1,46 @@
+<div class="main-content">
+  <div class="container-fluid">
+    <div class="col-sm-12">
+      <!--inicio formulario de nuevo usuario-->
+      <div class="card card-profile" *ngIf="nUsuario">
+        <div class="card-header card-header-danger ">
+          <h4 class="card-title text-center">{{msjAgreEdit}} {{newTitle}}</h4>
+          <p class="card-category text-center">*Campos marcados con * son requeridos</p>
+        </div>
+          <mat-progress-bar mode="indeterminate" class="mt-2 mb-4" [hidden]="!creandoUsuario"></mat-progress-bar>
+
+        <form [formGroup]="nuevoUsuarioForm" (ngSubmit)="nuevoUsuario()" >
+            <div class="form-group">
+            <div class="row">
+                <div class="col-sm-5 mx-4 " *ngFor="let item of  etiquetasColumnas;let i=index">
+                  <mat-form-field  *ngIf="item.type!='boolean'" class="">
+                    <mat-label >{{item.etiqueta}}</mat-label>
+                    <div [ngSwitch]="item.type">
+                      <input *ngSwitchCase="'string'"   matInput type="text"  placeholder="Digite {{item.etiqueta}}" id="{{item.item}}" name="{{item.item}}" [formControlName]="item.item" required/>
+                      <input *ngSwitchCase="'number'"  matInput type="number"  placeholder="Digite {{item.etiqueta}}" id="{{item.item}}" name="{{item.item}}" [formControlName]="item.item" required/>
+                      <input *ngSwitchDefault type="text"  matInput  placeholder="Digite {{item.etiqueta}}" id="{{item.etiqueta}}" name="{{item.item}}" [formControlName]="item.item" required/>
+                    </div>
+                    <mat-error>
+                     El campo:  {{item.etiqueta}} es <strong>obligatorio</strong>
+                    </mat-error>
+                  </mat-form-field>
+                    <mat-slide-toggle  *ngIf="item.type=='boolean'"  [formControlName]="item.item" (change)="activarDesactivarUsuario()"> Registro {{this.textActive}} </mat-slide-toggle>
+                </div >
+            </div>
+          </div>
+
+
+          <div class="form-group">
+            <div class="row">
+              <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="submit" [disabled]="!nuevoUsuarioForm.valid">{{mensajeBoton}}
+              </button>
+              <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="button" (click)="llamarFormulario.emit({cancel:'1',msj:'null'});">Cancelar</button>
+            </div>
+          </div>
+
+      </form>
+      </div>
+
+    </div>
+  </div>
+</div>

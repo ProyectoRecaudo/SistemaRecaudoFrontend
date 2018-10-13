@@ -1,0 +1,137 @@
+<div class="main-content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="card ">
+          <div class="card-header card-header-danger">
+            <h4 class="card-title">Tabla de Roles</h4>
+            <p class="card-category">Registro de Roles</p>
+          </div>
+
+          <div class="card-body">
+            <!--Filtros  -->
+            <div class="row justify-content-center">
+
+              <!--Input filtro de un campo-->
+              <div class="col-sm-5">
+                <mat-form-field>
+                  <input matInput [(ngModel)]="filtroNombreRol" (keyup)="aplicarFiltro()" placeholder="Buscar por nombre de rol">
+                  <button mat-button *ngIf="filtroNombreRol" matSuffix mat-icon-button aria-label="Clear" (click)="clearInput()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </mat-form-field>
+              </div>
+              <!--Fin filtro input -->
+              <!--Filtro boton  toggle inhabilidatos -->
+              <div class="col-sm-5 mt-3">
+                <mat-slide-toggle (change)="aplicarFiltro();cambiarMensajeToggle();" [(ngModel)]="toggleActDesc">{{msjToggle}}</mat-slide-toggle>
+              </div>
+              <!--Fin Filtro boton toggle -->
+              <!--Fin Filtros-->
+            </div>
+
+            <hr>
+
+            <!--Mensaje de confirmacion-->
+            <div data-notify="container" *ngIf="mensaje" [class]="claseDinamic">
+              <i class="material-icons" data-notify="icon">{{iconAlert}}</i>
+              <button mat-button type="button" class="close" aria-label="Close" (click)="closeDialog()">
+                <i class="material-icons">close</i>
+              </button>
+              <span data-notify="message">
+                <b>Info:</b> {{mensaje}} </span>
+              <div class="col-sm-4">
+                <button mat-raised-button class="btn btn-outline-primary mb-3" (click)="consultarRoles()" *ngIf="respuesta=='error'">Intentar
+                  de nuevo
+                </button>
+              </div>
+            </div>
+            <!--
+                <mat-progress-bar mode="indeterminate" class="mt-2 mb-4" [hidden]="!creandoUsuario"></mat-progress-bar>
+              -->
+
+            <!--Fin mensaje confirmacion-->
+            <div *ngIf="respuesta==null">
+              Cargando Roles
+              <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+            </div>
+
+
+            <div class="row px-4">
+
+              <button mat-raised-button class="btn btn-outline-primary col-sm-4 mx-auto mb-3" type="submit" (click)="llamarFormularioAgregarRol.emit(null);"
+                [disabled]="botonBloqueo">
+                Nuevo Rol
+              </button>
+              <button mat-raised-button class="btn btn-outline-primary col-sm-4 mx-auto mb-3" type="submit" (click)="llamarFormUsuarios.emit(null);">
+                Volver a Usuarios
+              </button>
+              <!--[disabled]="botonBloqueo"-->
+
+            </div>
+
+            <div class="table-responsive mat-elevation-z8">
+              <mat-table [dataSource]="dataSource" matSort class="table table-full-width">
+                <ng-container matColumnDef="nombrerol">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Rol </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.getRolactivo() }">
+                    {{element.nombrerol}}
+                  </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="descripcionrol">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header>Descripción</mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.getRolactivo() }">
+                    {{element.getDescripcionRol()}}
+                  </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="rolactivo">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Rol Activo/Desactivado </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.getRolactivo() }">
+                    {{element.getRolactivo()?'Activo':'Desactivado'}}
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Acciones </mat-header-cell>
+                  <mat-cell *matCellDef="let element ; let i=index">
+
+                    <button mat-icon-button matTooltip="Editar Rol"  type="button" class="btn btn-info" (click)="enviarRol.emit({rol:element})"> <i class="material-icons ">edit</i>
+                    </button>
+
+                    <button mat-icon-button matTooltip="Eliminar Rol"  type="button" class="btn btn-primary" (click)="openDialog(element)">
+                      <i class="material-icons ">delete</i>
+                    </button>
+
+                    <div *ngIf="element.getRolactivo()">
+
+                      <button mat-icon-button matTooltip="Desactivar Rol"  type="button" class="btn btn-danger" (click)="cambiarEstadoRol(element)">
+                        <i class="material-icons ">not_interested</i>
+                      </button>
+                    </div>
+                    <div *ngIf="!element.getRolactivo()">
+
+                      <button mat-icon-button matTooltip="Activar Rol"  type="button" class="btn btn-success" (click)="cambiarEstadoRol(element)">
+                        <i class="material-icons ">done</i>
+                      </button>
+                    </div>
+
+
+                  </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="cabecerasColumnas"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: cabecerasColumnas;"></mat-row>
+              </mat-table>
+              <mat-paginator #paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]" [showFirstLastButtons]="true">
+              </mat-paginator>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!--Fin Tabla empelados-->
+
+    </div>
+
+  </div>
+</div>

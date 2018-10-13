@@ -1,0 +1,148 @@
+<div class="main-content">
+  <div class="container-fluid">
+
+    <div class="row">
+      <!--Tabla Usuarios-->
+      <div class="col-sm-12">
+        <div class="card ">
+          <div class="card-header card-header-danger">
+            <h4 class="card-title">Tabla Usuarios</h4>
+            <p class="card-category">Registro de los Usuarios</p>
+          </div>
+
+          <div class="card-body">
+            <!--Filtros  -->
+            <div class="row justify-content-center">
+
+              <!--Input filtro de un campo-->
+              <div class="col-sm-5">
+                <mat-form-field>
+                  <input matInput [(ngModel)]="filtroNombreCedula" (keyup)="aplicarFiltro()" placeholder="Buscar por nombre o cedula">
+                  <button mat-button *ngIf="filtroNombreCedula" matSuffix mat-icon-button aria-label="Clear" (click)="clearInput()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </mat-form-field>
+              </div>
+              <!--Fin filtro input -->
+              <!--Filtro boton  toggle inhabilidatos -->
+              <div class="col-sm-5 mt-3">
+                <mat-slide-toggle (change)="aplicarFiltro();cambiarMensajeToggle();" [(ngModel)]="toggleActDesc">{{msjToggle}}</mat-slide-toggle>
+              </div>
+              <!--Fin Filtro boton toggle -->
+              <!--Fin Filtros-->
+
+
+
+            </div>
+
+            <!--Mensaje de confirmacion-->
+            <div data-notify="container" *ngIf="mensaje" [class]="claseDinamic">
+              <i class="material-icons" data-notify="icon">{{iconAlert}}</i>
+              <button mat-button type="button" class="close" aria-label="Close" (click)="closeDialog()">
+                <i class="material-icons">close</i>
+              </button>
+              <span data-notify="message">
+                <b>Info:</b> {{mensaje}} </span>
+              <div class="col-sm-4">
+                <button mat-raised-button class="btn btn-outline-primary mb-3" (click)="consultarUsuarios();mensaje=''"
+                  *ngIf="respuesta=='error'">Intentar nuevamente
+                </button>
+              </div>
+            </div>
+            <!--
+            <mat-progress-bar mode="indeterminate" class="mt-2 mb-4" [hidden]="!creandoUsuario"></mat-progress-bar>
+          -->
+
+            <!--Fin mensaje confirmacion-->
+            <div *ngIf="respuesta==null">
+              Cargando usuarios
+              <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+            </div>
+
+            <hr>
+
+            <div class="row justify-content-center my-4 px-4">
+
+              <button mat-raised-button class="btn btn-outline-primary col-sm-4 mx-auto mb-3" type="submit" (click)="llamarFormulario.emit(null);"
+                [disabled]="botonBloqueo">
+                Nuevo Usuario
+              </button>
+
+              <button mat-raised-button class="btn btn-outline-primary col-sm-4 mx-auto mb-3" type="submit" (click)="llamarFormRoles.emit(null);">
+                Ver Roles
+              </button>
+              <!--[disabled]="botonBloqueo"-->
+            </div>
+
+            <div class="table-responsive mat-elevation-z8">
+              <mat-table [dataSource]="dataSource" matSort class="table table-full-width">
+                <ng-container matColumnDef="identificacion">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Identificación </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.getUsuarioActivo() }">
+                    {{element.getIdentificacion()}}
+                  </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="nombreusuario">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.getUsuarioActivo() }">
+                    {{element.getNombreUsuario()}} {{element.getApellido()}}
+                  </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="nombrerol">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Rol </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.getUsuarioActivo() }">
+                    {{element.getRoles().nombrerol}}
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="usuarioactivo">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Usuario Activo/Desactivado</mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.usuarioactivo }">
+                    {{element.usuarioactivo?'Activo':'Desactivado'}}
+                  </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="actions">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Acciones </mat-header-cell>
+                  <mat-cell *matCellDef="let element ; let i=index">
+
+                    <button mat-icon-button matTooltip="Editar usuario"  type="button" class="btn btn-info" (click)="enviarUSuario.emit({ usuario: element });">
+                      <i class="material-icons ">edit</i>
+                    </button>
+
+                    <button mat-icon-button matTooltip="Eliminar usuario"  type="button" class="btn btn-primary" (click)="llamarDialog(element)">
+                      <i class="material-icons ">delete</i>
+                    </button>
+
+                    <div *ngIf="element.usuarioactivo">
+                      <button mat-icon-button matTooltip="Desactivar usuario"  type="button" class="btn btn-danger"                      (click)="cambiarEstado(element)">
+                        
+                        <i class="material-icons ">not_interested</i>
+                      </button>
+                    </div>
+                    
+                    <div *ngIf="!element.usuarioactivo">
+                      <button mat-icon-button matTooltip="Activar usuario"  type="button" class="btn btn-success"                      (click)="cambiarEstado(element)">
+                        
+                        <i class="material-icons ">done</i>
+                      </button>
+                    </div>
+
+                  </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="cabecerasColumnas"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: cabecerasColumnas;"></mat-row>
+              </mat-table>
+              <mat-paginator #paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]" [showFirstLastButtons]="true">
+              </mat-paginator>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!--Fin Tabla empelados-->
+
+
+    </div>
+  </div>
+</div>

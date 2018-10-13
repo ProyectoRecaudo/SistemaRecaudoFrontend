@@ -1,0 +1,60 @@
+<div class="card">
+    <div class="card-header">
+        <div [class]="clase">
+
+            <h4 class="card-title text-center">{{ cabeceras[0].e +': '+ datos[cabeceras[0].ie] }}</h4>
+        </div>
+    </div>
+
+    <div class="card-body table-full-width">
+
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <tbody>
+                    <tr *ngFor="let item of cabeceras; let i=index">
+                        <td *ngIf="i!=0 && item.s!=false">{{item.e}}</td>
+                        <td *ngIf="i!=0 && item.s!=false">{{datos[item.ie]}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div *ngIf="this.datos.recibopesajeactivo!=null">
+
+            <div class="row" *ngIf="!this.datos.recibopesajeactivo">
+                <span class="badge badge-danger col-sm-6 ml-auto mr-auto">Anulada</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 ml-auto mr-auto">
+                <p class="text-warning text-center" *ngIf="ocultarVer">
+                    {{msjrecibo}}
+                </p>
+            </div>
+        </div>
+        <div *ngIf="bloquearboton">
+            <p class="text-center">
+                Anulando recibo
+            </p>
+            <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+        </div>
+
+        <div class="row">
+            <button mat-raised-button class="btn btn-primary btn-link  btn-sm col-sm-4 ml-auto mr-auto" (click)="desactivarRegistro()"
+                [disabled]='bloquearboton' *ngIf="this.datos.recibopesajeactivo">{{textDesac}}</button>
+            <button mat-raised-button class="btn btn-primary btn-link  btn-sm col-sm-4 ml-auto mr-auto" (click)='mostrarModal()'
+                *ngIf="!ocultarVer">Ver
+                detalle
+            </button>
+            <button mat-raised-button class="btn btn-primary btn-link  btn-sm col-sm-4 ml-auto mr-auto" *ngIf="ocultarVer"
+                (click)='cancelarDesactivar()'>Cancelar
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- <div *ngIf="datos.datoscompletos.length!=0"> -->
+
+<!-- </div> -->

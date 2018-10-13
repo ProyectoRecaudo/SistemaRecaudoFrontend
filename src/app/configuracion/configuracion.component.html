@@ -1,0 +1,62 @@
+<div class="main-content">
+    <div class="container-fluid">
+        <!-- Tabla de visualización de puertas -->
+        <div class="row">
+            <!--Tabla puertas-->
+            <div class="col-sm-12">
+                <div class="card ">
+                    <div class="card-header card-header-danger">
+                        <h4 class="card-title">Configuración</h4>
+                        <p class="card-category">Configuración del sistema</p>
+                    </div>
+
+                    <div class="card-body">
+                        <form [formGroup]="configuracionForm" (ngSubmit)="guardarCambios()">
+
+                            <div class="form-group">
+                                <div class="row">
+
+                                    <div class="col-sm-12 mx-auto">
+                                        <mat-form-field class="example-full-width">
+                                            <input matInput type="text" placeholder="Numero de factura" id="noFactura"
+                                                name="noFactura" formControlName="noFactura">
+                                        </mat-form-field>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="col-sm-6 mt-3">
+                                        <mat-slide-toggle formControlName="conf1" id="conf1" name="conf1">
+                                            Configuracion 1 
+                                        </mat-slide-toggle>
+                                    </div>
+                                    <div class="col-sm-6 mx-auto">
+                                        <mat-form-field class="example-full-width">
+                                            <input matInput type="text" placeholder="Configuracion 2" id="conf2" name="conf2"
+                                                formControlName="conf2">
+                                        </mat-form-field>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="row">
+                                    <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="submit"
+                                        [disabled]="!configuracionForm.valid">
+                                        Guardar
+                                    </button>
+                                    <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="button">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

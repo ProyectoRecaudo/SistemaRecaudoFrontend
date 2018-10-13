@@ -1,0 +1,278 @@
+<div class="main-content">
+    <div class="container-fluid">
+        <div class="col-sm-12">
+
+            <!-- Vista principal de las opciones de Puestos fijos -->
+            <div class="card " *ngIf="mostrarForm && mostrarHistorico">
+                <div class="card-header card-header-danger">
+                    <h3 class="card-title text-center">Recaudo Puestos fijos</h3>
+                    <p class="card-category text-center">Sección de Recibo de Puestos fijos</p>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row mt-5">
+                        <div class="col-md-6 ">
+                            <div class="card card-chart">
+                                <div class="card-header card-header-primary" data-header-animation="true">
+                                    <h3 class="card-title text-center">Recibos Puestos fijos <i class="material-icons ">description</i></h3>
+                                    <p class="card-category"></p>
+                                </div>
+                                <div class="card-body ">
+                                    <div class="card-actions">
+                                        <button mat-raised-button class="btn btn-outline-primary col-8 mx-auto" (click)="mostrarHistorico= !mostrarHistorico">
+                                            Ver histórico <i class="material-icons">remove_red_eye</i></button>
+
+                                    </div>
+                                    <h4 class="card-title text-center">Consultar el hisórico de recibos</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 ">
+                            <div class="card card-chart">
+                                <div class="card-header card-header-info" data-header-animation="true">
+                                    <h3 class="card-title text-center">Facturas Puestos fijos <i class="material-icons ">credit_card</i></h3>
+                                    <p class="card-category"></p>
+                                </div>
+                                <div class="card-body ">
+                                    <div class="card-actions">
+
+                                        <button mat-raised-button class="btn btn-outline-primary col-8 mx-auto" (click)="mostrarForm= !mostrarForm">
+                                            Ver facturas <i class="material-icons">control_point</i>
+                                        </button>
+
+                                    </div>
+                                    <h4 class="card-title text-center">Pagar Facturas </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!--FIN Vista principal de las opciones de pesaje -->
+
+
+            <!-- Vista principal de el formulario de pagar pesaje, tarjetas de factura-->
+            <div class="card" *ngIf="!mostrarForm">
+                <div class="card-header card-header-danger">
+                    <h3 class="card-title text-center">Recaudo Puestos Fijos</h3>
+                    <p class="card-category text-center">Sección de Recibo de Puestos Fijos</p>
+                </div>
+
+                <div class="card-body">
+                    <!--Mensaje de confirmacion carga de datos en el select-->
+                    <div data-notify="container" *ngIf="mensajedatos" class="alert alert-warning alert-with-icon">
+                        <i class="material-icons" data-notify="icon">warning</i>
+                        <button mat-button type="button" class="close" aria-label="Close" (click)="mensajedatos=''">
+                            <i class="material-icons">close</i>
+                        </button>
+                        <span data-notify="message">
+                            <b>Info:</b> {{mensajedatos}} </span>
+                    </div>
+                    <!--
+                        Boton regresar
+                    -->
+                    <div class="row">
+
+                        <button mat-raised-button type="button" class="btn btn-primary btn-link" (click)='mostrarForm= !mostrarForm'>
+                            <span class="btn-label">
+                                <i class="material-icons">keyboard_arrow_left</i>
+                            </span>
+                            Volver
+
+                        </button>
+                    </div>
+
+
+                    <form [formGroup]="puestosForm">
+
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <mat-form-field>
+                                    <mat-select placeholder="Seleccione plaza" id="fkidplaza" formControlName="fkidplaza" (selectionChange)="consultarSectores($event.value)">
+                                        <mat-option value=''>Todos</mat-option>
+                                        <mat-option [value]='consulta["pkidplaza"]' *ngFor="let consulta of consultas['plaza']">{{consulta['nombreplaza']}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-sm-5">
+                                <mat-form-field>
+                                    <mat-select placeholder="Seleccione Sector" id="fkidsector" formControlName="fkidsector">
+                                        <mat-option value=''>Todos</mat-option>
+                                        <mat-option [value]='sector.pkidsector' *ngFor="let sector of sectores">{{sector.nombresector}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <mat-form-field>
+                                    <input matInput placeholder="Buscar por número de puesto" formControlName="filtro1">
+                                    <button mat-button *ngIf="puestosForm.get('filtro1').value" matSuffix mat-icon-button aria-label="Clear" (click)="puestosForm.get('filtro1').setValue('')">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-sm-5">
+                                <mat-form-field>
+                                    <input matInput placeholder="Buscar por C.C de Beneficiario" formControlName="filtro2" type="number">
+                                    <button mat-button *ngIf="puestosForm.get('filtro2').value" matSuffix mat-icon-button aria-label="Clear" (click)="puestosForm.get('filtro2').setValue('')">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 ml-auto mr-auto">
+                                <button class="btn btn-outline-primary btn-round" (click)="buscarRecibo()">
+                                    <i class="material-icons">search</i> Buscar
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+
+                    <hr>
+                    <!--linea divisora entre filtros y tabla de reportes-->
+
+                    <div *ngIf="cargandopuestos">
+                        Cargando Recibos puestos Fijos
+                        <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+                    </div>
+
+                    <!--mensaje en caso q los datos sean nullos-->
+                    <div data-notify="container" *ngIf="datosvacios" class="alert alert-warning alert-with-icon">
+                        <i class="material-icons" data-notify="icon">warning</i>
+                        <button mat-button type="button" class="close" aria-label="Close" (click)="datosvacios=false">
+                            <i class="material-icons">close</i>
+                        </button>
+                        <span data-notify="message">
+                            <b>Info:</b> No hay Facturas para los filtros seleccionados </span>
+                    </div>
+
+                    <div *ngIf="datos.length!=0">
+                        <div class="row">
+                            <div *ngFor="let dato of datos; let i=index" class="col-md-6">
+                                <!-- <div [ngClass]="{'row': i==0 || ((i%3)==0)}" >  -->
+
+                                <div>
+                                    <app-recibo-dinamico-puestos [datos]='dato' [i]='i' [cabeceras]='cabeceras' (enviarObjetoPagar)='recibirObjetoPagar($event)'
+                                        (enviarObjeto)='recibirObjeto($event)'></app-recibo-dinamico-puestos>
+                                </div>
+                                <!-- </div> -->
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+            <!--FIN Vista principal de el formulario de pagar pesaje tarjetas de factura-->
+
+
+            <!--Historico de recaudo pesaje-->
+            <div *ngIf="!mostrarHistorico">
+                <app-historicos-puestos-fijos (ocultar)='mostrarHistorico= !mostrarHistorico'> </app-historicos-puestos-fijos>
+            </div>
+            <!--FIN Historico de recaudo pesaje-->
+
+        </div>
+    </div>
+</div>
+
+<!--Modal para mostrar los datos de detalle de la facutra, con opciones de imprimir recibo y cancelar-->
+<div *ngIf="datosmodal.length!=0">
+    <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Vista previa del recibo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <app-modal-confirmacion [datos]='datosmodal'></app-modal-confirmacion>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"> <i class="material-icons">cancel</i>Cancelar</button>
+                    <button type="button" class="btn btn-success"><i class="material-icons">print</i>Imprimir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--FIN Modal para mostrar los datos de detalle de la facutra, con opciones de imprimir recibo y cancelar-->
+
+<!--Modal para pagar el recibo de puestos fijos, con opciones de fuardar y guardar e imprimir-->
+
+<div>
+    <div class="modal fade" id="modalPagarFactura" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Recibo recaudo Fijo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- <app-modal-confirmacion [datos]='datos.otrosdatos'></app-modal-confirmacion> -->
+                    <app-modal-recibo [datos]='datospagar' [otrosdatos]='otrosdatos' [datoscompletos]='datoscompletos' [nrecibo]='nrecibo' (enviardatos)='guardarRecibo($event)'></app-modal-recibo>
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--FIN Modal para pagar el recibo de puestos fijos, con opciones de fuardar y guardar e imprimir-->
+
+<!--
+            Modal de confirmacion cuando este a punto de pagar la factura
+        -->
+<div>
+    <div class="modal fade" id="modalconformacion" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Resumen de la información</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="ocultarmodal()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <app-modal-confirmacion [datos]='nuevosotrosdatos'></app-modal-confirmacion>
+                    <div *ngIf="guardandorecibo">
+                        Guardando Recibo puestos fijo
+                        <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+                    </div>
+                    <!--Mensaje de error en caso que falle la insercion del recibo-->
+                    <div data-notify="container" *ngIf="mensajeErrorRecibo" class="alert alert-warning alert-with-icon">
+                        <i class="material-icons" data-notify="icon">warning</i>
+                        <button mat-button type="button" class="close" aria-label="Close" (click)="mensajeErrorRecibo=''">
+                            <i class="material-icons">close</i>
+                        </button>
+                        <span data-notify="message">
+                            <b>Info:</b> {{mensajeErrorRecibo}} </span>
+                    </div>
+                    <!--Fin Mensaje de error en caso que falle la insercion del recibo-->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" (click)="ocultarmodal()"> <i class="material-icons"> cancel</i>Cancelar</button>
+                    <button type="button" class="btn btn-success" (click)="aceptarGuardarRecibo()"><i class="material-icons">done_all</i>Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--
+           Fin Modal de confirmacion cuando este a punto de pagar la factura
+        -->

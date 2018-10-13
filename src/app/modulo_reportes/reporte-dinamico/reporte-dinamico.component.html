@@ -1,0 +1,234 @@
+<div class="main-content">
+  <div class="container-fluid">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header card-header-danger ">
+          <h4 class="card-title text-center">{{nombrereporte}}</h4>
+        </div>
+
+        <div class="card-body">
+
+          <div class="alert alert-info">
+            <button mat-button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <i class="material-icons">close</i>
+            </button>
+            <span>
+              <b> Info - </b> Seleccione los filtros y presione Generar Reporte para ver los resultados en una tabla</span>
+          </div>
+
+
+          <!--Mensaje de confirmacion-->
+          <div data-notify="container" *ngIf="mensaje" class="alert alert-warning alert-with-icon">
+            <i class="material-icons" data-notify="icon">warning</i>
+            <button mat-button type="button" class="close" aria-label="Close" (click)="mensaje=''">
+              <i class="material-icons">close</i>
+            </button>
+            <span data-notify="message">
+              <b>Info:</b> {{mensaje}} </span>
+            <div class="col-sm-4">
+              <button mat-raised-button class="btn btn-outline-primary mb-3" (click)="consultarDatos()" *ngIf="respuesta=='error'">Intentar
+                nuevamente
+              </button>
+            </div>
+          </div>
+          <!--Fin mensaje confirmacion-->
+          <!--Filtros para fechas de inicio/final-->
+          <div class="row justify-content-center">
+            <div class="col-sm-3">
+
+              <mat-form-field>
+                <input matInput [matDatepicker]="fechainicial" placeholder="Fecha inicio" [formControl]="dateinicial">
+                <mat-datepicker-toggle matSuffix [for]="fechainicial"></mat-datepicker-toggle>
+                <mat-datepicker #fechainicial></mat-datepicker>
+              </mat-form-field>
+
+            </div>
+            <div class="col-sm-3">
+              <mat-form-field>
+                <input matInput [matDatepicker]="fechafinal" placeholder="Fecha final" [formControl]="datefinal">
+                <mat-datepicker-toggle matSuffix [for]="fechafinal"></mat-datepicker-toggle>
+                <mat-datepicker #fechafinal></mat-datepicker>
+              </mat-form-field>
+
+            </div>
+          </div>
+
+          <!--Validar todos los casos posibles para los filtros, con el campo, numerofiltro, son 3 casos posibles-->
+          <div class="row" *ngIf="filtros.length!=0">
+            <div class="col-sm-3">
+              <mat-form-field>
+                <mat-select placeholder="Seleccione plaza" id="fkidplaza" [formControl]="fkidplaza" (selectionChange)="consultarSectores(fkidplaza.value)">
+                  <mat-option value=''>Todos</mat-option>
+                  <mat-option [value]='consulta["pkidplaza"]' *ngFor="let consulta of consultas['plaza']">{{consulta['nombreplaza']}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div [ngSwitch]="numerofiltro" class="col-sm-3">
+              <mat-form-field *ngSwitchCase="'2'">
+                <mat-select placeholder="Seleccione Sector" id="fkidsector" [formControl]="fkidsector">
+                  <mat-option value=''>Todos</mat-option>
+                  <mat-option [value]='sector.pkidsector' *ngFor="let sector of sectores">{{sector.nombresector}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+            </div>
+          </div>
+
+
+          <!--FIN Filtros input/select para fechas de inicio/final-->
+          <div [ngSwitch]="numerofiltro" class="col-sm-12">
+            <!-- caso de reporte 4 Reporte de recibos de vehiculos -->
+            <div class="col-sm-12">
+              <mat-form-field *ngSwitchCase="'4'">
+                <mat-select placeholder="Seleccione tipo de vehiculo" id="fkidtipovehiculo" [formControl]="fkidtipovehiculo">
+                  <mat-option value=''>Todos</mat-option>
+                  <mat-option [value]= 'tipovehiculo.pkidtipovehiculo' *ngFor="let tipovehiculo of tiposvehiculo">{{tipovehiculo.nombretipovehiculo}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            <mat-form-field *ngSwitchCase="'4'">
+                <mat-select placeholder="Seleccione plaza" id="fkidplaza" [formControl]="fkidplaza" (selectionChange)="consultarPuertas(fkidplaza.value)">
+                  <mat-option value=''>Todos</mat-option>
+                  <mat-option [value]='consulta["pkidplaza"]' *ngFor="let consulta of consultas['plaza']">{{consulta['nombreplaza']}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            <mat-form-field *ngSwitchCase="'4'">                
+              <mat-select placeholder="Selecione una puerta " id="fkidpuerta" [formControl]="fkidpuerta">
+                <mat-option value=''>Todos</mat-option>
+                <mat-option [value]='puerta.pkidpuerta' *ngFor="let puerta of puertas">{{puerta.nombrepuerta}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <!-- fin de reporte caso 4 reporte de recibos de vehiculos -->
+            <!-- Inicio reporte recibo animal y recibo pesaje animal -->
+            <mat-form-field *ngSwitchCase="'5'">
+              <mat-select placeholder="Seleccione tipo de animal" id="fkidtipoanimal" [formControl]="fkidtipoanimal" (selectionChange)="consultarEspecieAnimal(fkidtipoanimal.value)">
+                <mat-option value=''>Todos</mat-option>
+                <mat-option [value]='consulta["pkidtipoanimal"]' *ngFor="let consulta of consultas['tipoanimal']">{{consulta['nombretipoanimal']}}</mat-option>
+              </mat-select>
+          </mat-form-field>
+            <mat-form-field *ngSwitchCase="'5'">
+              <mat-select placeholder="Seleccione del especieanimal" id="fkidespecieanimal" [formControl]="fkidespecieanimal" >
+                <mat-option value=''>Todos</mat-option>
+                <mat-option [value]='especie.pkidespecieanimal' *ngFor="let especie of especieanimal">{{especie.nombreespecieanimal}}</mat-option>
+              </mat-select>
+          </mat-form-field>
+            <mat-form-field *ngSwitchCase="'5'">                
+              <mat-select placeholder="Selecione categoría de animal " id="fkidcategoriaanimal" [formControl]="fkidcategoriaanimal">
+                <mat-option value=''>Todos</mat-option>
+                <mat-option [value]='consulta["pkidcategoriaanimal"]' *ngFor="let consulta of consultas['categoriaanimal']">{{consulta['nombrecategoriaanimal']}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field *ngSwitchCase="'5'">
+                <mat-select placeholder="Seleccione plaza" id="fkidplaza" [formControl]="fkidplaza" (selectionChange)="consultarSectores(fkidplaza.value)">
+                  <mat-option value=''>Todos</mat-option>
+                  <mat-option [value]='consulta["pkidplaza"]' *ngFor="let consulta of consultas['plaza']">{{consulta['nombreplaza']}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <!-- Inicio reporte recibo animal y recibo pesaje animal -->
+            </div>
+            
+            
+        </div>
+
+          <!--
+            controles generados dinamicamente con la consulta 
+            
+          -->
+          <form [formGroup]="formDatos">
+
+            <div class="row">
+              <div class="col-sm-3" *ngFor="let item of filtros">
+                <div [ngSwitch]="item.tipofiltro">
+                  <mat-form-field *ngSwitchCase="'input'">
+                    <input matInput placeholder="Digite {{item.nombrefiltro}}" id="{{item.nombreatributo}}" name="{{item.nombreatributo}}" [formControlName]="item.nombreatributo">
+                    <button mat-button matSuffix mat-icon-button aria-label="Clear" (click)="clearInput(item.nombreatributo)">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </mat-form-field>
+                </div>
+                <!--
+                    <mat-form-field *ngSwitchCase="'select'">
+                      <mat-select placeholder="Seleccione {{item.nombrefiltro}}" id="{{item.nombreatributo}}" [formControlName]="item.nombreatributo">
+                        <mat-option [value]='consulta["pkid"+item.nombretabla]' *ngFor="let consulta of consultas[item.nombretabla]">{{consulta['nombre'+item.nombretabla]}}</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  -->
+              </div>
+
+
+            </div>
+
+            <!--Boton para generar reporte-->
+            <div class="row justify-content-sm-end">
+              <div class="col-sm-6">
+                <button mat-button class="btn btn-outline-danger" type="submit" (click)="generarReportePaginado(0);mostrartabla=!mostrartabla;respuesta=null">Generar
+                  reporte
+                </button>
+              </div>
+              <div class="col-sm-6 ">
+                <div class="row">
+                  <p class="text-info col-sm-12">
+                    Para exportar un reporte, recuerde deshabilitar los PopUps </p>
+                  <button mat-button class="btn btn-danger col-sm-5" type="submit" (click)="generarPDF()" [disabled]="bloqueo">Exportar
+                    PDF
+                  </button>
+                  <button mat-button class="btn btn-success col-sm-5" type="submit" (click)="generarEXCEL()" [disabled]="bloqueo">Exportar
+                    EXCEL
+                  </button>
+
+
+                </div>
+              </div>
+            </div>
+
+          </form>
+
+          <!--
+            FIN controles input/select generados dinamicamente con la consulta 
+          -->
+          <hr>
+          <!--linea divisora entre filtros y tabla de reportes-->
+
+          <div *ngIf="respuesta==null ">
+            Cargando datos de reporte
+            <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+          </div>
+
+          <!--mensaje en caso q los datos sean nullos-->
+          <div data-notify="container" *ngIf="datosvacios" class="alert alert-warning alert-with-icon">
+            <i class="material-icons" data-notify="icon">warning</i>
+            <button mat-button type="button" class="close" aria-label="Close" (click)="datosvacios=false">
+              <i class="material-icons">close</i>
+            </button>
+            <span data-notify="message">
+              <b>Info:</b> No hay datos para los filtros seleccionados </span>
+          </div>
+
+          <div class="table-responsive mat-elevation-z8" *ngIf="mostrartabla">
+            <mat-table [dataSource]="dataSource" matSort class="table table-full-width">
+              <div *ngFor="let cabecera of cabeceras;let indice=index">
+                <ng-container matColumnDef="{{cabecera.nombrecampo}}">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header>{{cabecera.nombreetiqueta}}</mat-header-cell>
+                  <mat-cell *matCellDef="let element">{{element[cabecera.nombrecampo]|arrayOne}}</mat-cell>
+                </ng-container>
+
+              </div>
+              <mat-header-row *matHeaderRowDef="cabecerasColumnas"></mat-header-row>
+              <mat-row *matRowDef="let row; columns: cabecerasColumnas;"></mat-row>
+            </mat-table>
+
+          </div>
+
+          <div class="mb-2 ml-2 mt-2 bg-secondary text-white" *ngIf="mostrartabla">
+            <h4>
+                pagina actual : {{paginaactual}} de {{totalpaginas}}
+            </h4>
+          </div>
+          <mat-paginator *ngIf="mostrartabla" #paginator [pageSize]="itemsporpagina" [showFirstLastButtons]="true" [length]="totalitems" (page)="changePage($event)">
+          </mat-paginator>
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

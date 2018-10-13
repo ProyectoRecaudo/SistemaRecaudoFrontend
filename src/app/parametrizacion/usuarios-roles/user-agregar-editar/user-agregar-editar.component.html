@@ -1,0 +1,165 @@
+<div class="main-content">
+  <div class="container-fluid">
+    <div class="col-sm-12">
+      <!--inicio formulario de nuevo usuario-->
+      <div class="card card-profile" *ngIf="nUsuario">
+        <div class="card-header card-header-danger ">
+          <h4 class="card-title text-center">{{msjAgregarEditar}} </h4>
+          <p class="card-category text-center">*Todos los campos son obligatorios</p>
+        </div>
+
+        <div class="card-body">
+          <!--Mensaje de confirmacion-->
+          <div class="alert alert-warning alert-with-icon" data-notify="container" *ngIf="msg">
+            <i class="material-icons" data-notify="icon">warning</i>
+            <button mat-button type="button" class="close" aria-label="Close" (click)="closeDialog()">
+              <i class="material-icons">close</i>
+            </button>
+            <span data-notify="message">
+              <b>Info:</b> {{msg}} </span>
+          </div>
+          <mat-progress-bar mode="indeterminate" class="mt-2 mb-4" [hidden]="!creandoUsuario"></mat-progress-bar>
+
+          <!--Fin mensaje confirmacion-->
+        </div>
+
+
+        <div class="card-avatar mt-1">
+          <img class="img" [src]="url" />
+        </div>
+
+        <input style="display: none" type="file" (change)="onFileChanged($event)" #fileInput>
+
+        <div class="row px-5 my-3">
+          <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" (click)="fileInput.click()">
+            Seleccionar foto
+          </button>
+        </div>
+        <hr>
+        <!--
+
+          <input style="display: none" type="file" (change)="onFileChanged($event)" #fileInput>
+          <button (click)="fileInput.click()">Seleccionar foto</button>
+          <img [src]="url" height="200"> <br/>
+        -->
+
+        <form class="pl-5 mt-4" [formGroup]="nuevoUsuarioForm" (ngSubmit)="nuevoUsuario()" enctype="multipart/form-data">
+
+          <div class="form-group">
+            <div class="form-row">
+              <div class="col pr-5">
+                <mat-form-field class="example-full-width">
+                  <input matInput type="text" placeholder="Digite nombre de usuario" id="nombreUsuario" name="nombreUsuario"
+                    formControlName="nombreUsuario">
+                  <mat-error *ngIf="nuevoUsuarioForm.get('nombreUsuario').hasError('required')">
+                    El nombre es <strong>requerida</strong>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+              <div class="col pr-5">
+                <mat-form-field class="example-full-width">
+                  <input matInput type="text" placeholder="Digite apellido de usuario" id="apellido" name="apellido"
+                    formControlName="apellido">
+                  <mat-error *ngIf="nuevoUsuarioForm.get('apellido').hasError('required')">
+                    El apellido es <strong>requerida</strong>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-row">
+              <div class="col pr-5">
+                <mat-form-field class="example-full-width">
+                  <input matInput type="number" placeholder="Digite cedula" id="identificacion" name="identificacion"
+                    formControlName="identificacion">
+                  <mat-error *ngIf="nuevoUsuarioForm.get('identificacion').hasError('required')">
+                    La cedula es <strong>Obligatoria</strong>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+              <div class="col pr-5">
+                <mat-form-field class="example-full-width">
+                  <input matInput type="text" placeholder="Digite codigo de usuario" id="codigoUsuario" name="codigoUsuario"
+                    formControlName="codigoUsuario">
+                  <mat-error *ngIf="nuevoUsuarioForm.get('codigoUsuario').hasError('required')">
+                    El codigo de Usuario es <strong>requerida</strong>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="form-group">
+            <div class="form-row">
+
+              <div class="col pr-5">
+                <mat-form-field>
+                  <mat-select placeholder="Seleccione Rol" id="idRol" name="idRol" formControlName="idRol" [(value)]="idRol">
+                    <mat-option> -- </mat-option>
+                    <mat-option [value]='rol.pkidrol' *ngFor="let rol of roles">{{rol.nombrerol}}</mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="nuevoUsuarioForm.get('idRol').hasError('required')">Porfavor seleccione un rol</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col pr-5">
+                <mat-slide-toggle class="mt-3" (change)="activarDesactivarUsuario()" [checked]="active">
+                  Usuario {{textActive}}
+                </mat-slide-toggle>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-row">
+              <div class="col pr-5">
+                <mat-form-field class="example-full-width">
+                  <input matInput type="password" placeholder="Digite contraseña" id="contrasenia" name="contrasenia"
+                    formControlName="contrasenia">
+                  <mat-error *ngIf="nuevoUsuarioForm.get('contrasenia').hasError('required')">
+                    La contraseña es <strong>obligatoria</strong>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col pr-5">
+                <mat-form-field class="example-full-width">
+                  <input matInput type="password" placeholder="Repita contraseña" id="repetirContrasenia" name="repetirContrasenia"
+                    formControlName="repetirContrasenia">
+                  <!--<mat-error *ngIf="this.nuevoUsuarioForm.get('repetirContrasenia').errors && this.nuevoUsuarioForm.get('repetirContrasenia').dirty && this.nuevoUsuarioForm.get('repetirContrasenia').errors.validUrl">-->
+                  <mat-error *ngIf="ban">
+                    <strong> {{msg2}} </strong>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+            </div>
+          </div>
+
+
+
+          <div class="form-group">
+            <div class="row pr-5">
+
+              <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="submit" [disabled]="!nuevoUsuarioForm.valid">
+                {{mensajeBoton}}
+              </button>
+              <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="button" (click)="llamarFormulario.emit({cancel:'1',msj:'null'});">
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+      <!--
+            <pre>Status del formulario: {{ nuevoUsuarioForm.get('repetirContrasenia').hasError('') | json }}</pre>
+            <pre>Status del formulario: {{ nuevoUsuarioForm.get('repetirContrasenia').errors.validUrl | json }}</pre>
+            Fin formulario nuevo usuario
+          -->
+    </div>
+  </div>
+</div>

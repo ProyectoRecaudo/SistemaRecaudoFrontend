@@ -1,0 +1,566 @@
+<div class="main-content">
+  <div class="container-fluid" *ngIf="!oculta">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header card-header-danger ">
+          <h4 class="card-title text-center">Asignación de Puestos</h4>
+        </div>
+        <div class="card-body">
+
+          <div class="row mb-2">
+            <div class="col-sm-4">
+              <mat-form-field>
+                <input matInput [(ngModel)]="filtroNombreBeneficiario" (keyup)="aplicarFiltro()" placeholder="Buscar por nombre de beneficiario">
+                <button mat-button *ngIf="filtroNombreBeneficiario" matSuffix mat-icon-button aria-label="Clear"
+                  (click)="filtroNombreBeneficiario=''">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-form-field>
+            </div>
+
+            <div class="col-sm-4">
+              <mat-form-field>
+                <input matInput [(ngModel)]="filtroPuesto" (keyup)="aplicarFiltro()" placeholder="Buscar por numero de puesto">
+                <button mat-button *ngIf="filtroPuesto" matSuffix mat-icon-button aria-label="Clear" (click)="filtroPuesto=''">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-form-field>
+            </div>
+
+            <div class="col-sm-4">
+              <mat-form-field>
+                <mat-select placeholder="Seleccione tipo de puesto" [(ngModel)]="filtroTipoPuesto" (selectionChange)="aplicarFiltro()">
+                  <mat-option value=''>Todos</mat-option>
+                  <mat-option [value]='tipoPuesto.nombretipopuesto' *ngFor="let tipoPuesto of tiposPuesto">{{tipoPuesto.nombretipopuesto}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="row justify-content-center">
+            <div class="col-sm-4">
+              <mat-form-field>
+                <mat-select placeholder="Seleccione plaza" [(ngModel)]="filtroPlaza" (selectionChange)="modificaFiltroPlaza()">
+                  <mat-option value=''>Todos</mat-option>
+                  <mat-option [value]='plaza' *ngFor="let plaza of plazas">{{plaza.nombreplaza}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+
+
+            <!-- <div class="col-sm-4">
+              <mat-form-field>
+                <mat-select placeholder="Seleccione plaza" id="fkidplaza" [formControl]="fkidplaza" (selectionChange)="listarSectores(fkidplaza.value)">
+                  <mat-option value=''>Todos</mat-option>
+                  <mat-option [value]='plaza.pkidplaza' *ngFor="let plaza of plazas">{{plaza.nombreplaza}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div> -->
+            <div class="col-sm-4">
+              <mat-form-field>
+                <mat-select placeholder="Seleccione sector" [(ngModel)]="filtroSector" (selectionChange)="aplicarFiltro()">
+                  <mat-option value=''>Todos</mat-option>
+                  <mat-option [value]='sector.nombresector' *ngFor="let sector of sectores">{{sector.nombresector}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <!--Filtro boton  toggle inhabilidatos -->
+            <div class="col-sm-4 mt-3">
+              <mat-slide-toggle [(ngModel)]="filtroPuestosAsignados" (change)="aplicarFiltro()">
+                Ocultar puestos asignados
+              </mat-slide-toggle>
+            </div>
+            <!--Fin Filtro boton toggle -->
+          </div>
+          <hr>
+          <!--Mensaje de confirmacion-->
+          <div data-notify="container" *ngIf="mensajeRespuestaServidor" [class]="claseDinamic">
+            <i class="material-icons" data-notify="icon">{{iconAlert}}</i>
+            <button mat-button type="button" class="close" aria-label="Close" (click)="mensajeRespuestaServidor=''">
+              <i class="material-icons">close</i>
+            </button>
+            <span data-notify="message">
+              <b>Info:</b> {{mensajeRespuestaServidor}}
+            </span>
+          </div>
+          <!--Fin mensaje confirmacion-->
+
+          <!-- Botón asignar puesto -->
+          <div class="row px-4">
+            <button mat-raised-button class="btn btn-outline-primary col-sm-8 col-md-6 col-lg-6 mx-auto" (click)="opcionNuevaAsignacion()">
+              Asignar Puesto
+            </button>
+          </div>
+          <!-- FIN Botón asignar puesto -->
+
+          <div *ngIf="respuestaAsignaciones">
+            Cargando Asignaciones
+            <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+          </div>
+
+          <!-- Tabla de asignaciones de puesto -->
+          <div class="row mt-3 px-2">
+            <div class="table-responsive mat-elevation-z8">
+              <mat-table [dataSource]="dataSource" matSort class="table table-full-width">
+
+                <ng-container matColumnDef="numeroresolucionasignacionpuesto">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Numero Resolución </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.asignacionpuestoactivo }">
+                    {{ (element.numeroresolucionasignacionpuesto != null) ? element.numeroresolucionasignacionpuesto:
+                    'Sin Asignar'}}
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="fkidbeneficiario">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Beneficiario </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.asignacionpuestoactivo }">
+                    {{(element.beneficiario.nombrebeneficiario != null) ? element.beneficiario.nombrebeneficiario: 'Sin
+                    Asignar'}}
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="fkidplaza">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Plaza </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.asignacionpuestoactivo }">
+                    {{(element.plaza.nombreplaza != null) ? element.plaza.nombreplaza: 'Sin Asignar'}}
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="fkidpuesto">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Puesto </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.asignacionpuestoactivo }">
+                    {{(element.puesto.numeropuesto != null) ? element.puesto.numeropuesto: 'Sin Asignar'}}
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="valortarifapuesto">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Valor </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.asignacionpuestoactivo }">
+                    {{(element.valortarifapuesto != null) ? element.valortarifapuesto: 'Sin Asignar'}}
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="asignacionpuestoactivo">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Activo/Inactivo </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.asignacionpuestoactivo }">
+                    {{(element.asignacionpuestoactivo) ? 'Activa' : 'Inactiva'}}
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="estadoasignacionpuesto">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Estado Asignación </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.asignacionpuestoactivo }">
+                    {{(element.estadoasignacionpuesto != null) ? element.estadoasignacionpuesto: 'Sin Asignar'}}
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="rutaresolucionasignacionpuesto">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Resolución </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.asignacionpuestoactivo }">
+                    <span [outerHTML]="element.rutaresolucionasignacionpuesto | DatosPipe"></span>
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Acciones </mat-header-cell>
+                  <mat-cell *matCellDef="let element ; let i=index">
+
+                    <button mat-icon-button matTooltip="Editar Asignación" matTooltipClass="example-tooltip-red"
+                      aria-label="Button that shows a red tooltip" class="example-button" (click)="opcionEditarActivos(element)">
+                      <i class="material-icons text-primary">edit</i>
+                    </button>
+                    
+                    <button mat-icon-button matTooltip="Asignar un dependiente" matTooltipClass="example-tooltip-red"
+                      *ngIf="element.asignacionpuestoactivo" aria-label="Button that shows a red tooltip" class="example-button"
+                      (click)="asignarDependiente(element)">
+                      <i class="material-icons text-info">check_circle</i>
+                    </button>
+
+                    <button mat-icon-button matTooltip="Desactivar Asignación" matTooltipClass="example-tooltip-red"
+                      *ngIf="element.asignacionpuestoactivo" aria-label="Button that shows a red tooltip" class="example-button"
+                      (click)="desactivarAsignacion(element)">
+                      <i class="material-icons text-danger">not_interested</i>
+                    </button>
+
+                  </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="cabecerasColumnas"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: cabecerasColumnas;"></mat-row>
+
+              </mat-table>
+
+              <mat-paginator #paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]" [showFirstLastButtons]="true">
+              </mat-paginator>
+
+            </div>
+          </div>
+          <!-- FIN Tabla de asignaciones de puesto -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" *ngIf="oculta===true">
+
+    <!-- Formulario de registro o edición de asignaciones de puesto -->
+    <div class="row">
+
+      <div class="col-sm-12">
+        <!--inicio formulario de nuevo puerta-->
+        <div class="card">
+          <div class="card-header card-header-danger mb-4">
+            <h4 class="card-title text-center" *ngIf="banderaEditar === false">Asignar un puesto</h4>
+            <h4 class="card-title text-center" *ngIf="banderaEditar === true">Editar asignación de puesto</h4>
+            <!-- <p class="card-category text-center">*Todos los campos son obligatorios</p> -->
+          </div>
+
+          <!--Mensaje de confirmacion-->
+          <div data-notify="container" *ngIf="mensajeRespuestaForm" [class]="claseDinamic">
+            <i class="material-icons" data-notify="icon">{{iconAlert}}</i>
+            <button mat-button type="button" class="close" aria-label="Close" (click)="mensajeRespuestaForm=''">
+              <i class="material-icons">close</i>
+            </button>
+            <span data-notify="message">
+              {{mensajeRespuestaForm}}
+            </span>
+          </div>
+          <!--Fin mensaje confirmacion-->
+
+
+          <input style="display: none" type="file" (change)="onFileChanged($event)" #fileInput>
+
+          <div class="row" *ngIf="!urlDocumento">
+            <div class="col-12">
+              <h4 class="text-center">Seleccionar documento de resolución</h4>
+            </div>
+          </div>
+
+          <div class="row" *ngIf="urlDocumento && !linkDocumento">
+            <div class="col-12">
+              <h4 class="text-center">
+                {{ urlDocumento }}
+                <button (click)="deleteFile()" *ngIf="urldocumento || linkDocumento != 'Seleccionar documento de resolución'"
+                  matTooltip="Eliminar documento" [matTooltipPosition]="'above'" class="btn btn-danger btn-link btn-sm btn-just-icon">
+                  <i class="material-icons">close</i>
+                </button>
+              </h4>
+            </div>
+          </div>
+
+          <div class="row" *ngIf="urlDocumento && linkDocumento">
+            <div class="col-12 justify-content-center">
+              <h4 class="text-center">
+                <a [href]="linkDocumento" target="_blank">{{ urlDocumento }}</a>
+                <button (click)="deleteFile()" *ngIf="urldocumento || linkDocumento != 'Seleccionar documento de resolución'"
+                  matTooltip="Eliminar documento" [matTooltipPosition]="'above'" class="btn btn-danger btn-link btn-sm btn-just-icon">
+                  <i class="material-icons">close</i>
+                </button>
+              </h4>
+            </div>
+          </div>
+
+
+          <div class="row px-5 my-3">
+            <button mat-button class="btn btn-outline-primary col-sm-6 mx-auto" (click)="fileInput.click()" [disabled]="barraProgresoForm===true">
+              Seleccionar
+            </button>
+          </div>
+          <hr>
+          
+          <!-- Filtros Formulario  *ngIf="!banderaEditar" -->
+          <div class="card-body">
+            
+            <div *ngIf="respuestaAsignaciones">
+              Cargando Datos
+              <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+            </div>
+            <div class="row px-4 my-4" *ngIf="!banderaEditarInactivo">
+              <div class="col-md-6">
+                <mat-form-field>
+                  <input matInput [(ngModel)]="filtroPuestos" placeholder="Buscar puestos por numero" (keyup.enter)="buscarPuestoPorNumero()">
+                  <!-- <button mat-button matSuffix mat-icon-button aria-label="Clear" (click)="buscarPuestoPorNumero()"
+                    class="btn btn-primary btn-round btn-fab" data-toggle="modal" data-target="#myModal">
+                    <mat-icon>search</mat-icon>
+                  </button> -->
+                  <mat-hint>
+                    <span class="text-danger">Digite el numero del puesto + ENTER</span>
+                  </mat-hint>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-6">
+                <mat-form-field>
+                  <input matInput [(ngModel)]="filtroIdBeneficiario" placeholder="Buscar usuario por identificación"
+                    (keyup.enter)="buscarBeneficiarioId()">
+                  <!-- <button mat-button matSuffix mat-icon-button aria-label="Clear" (click)="buscarBeneficiarioId()"
+                    class="btn btn-primary btn-round btn-fab" data-toggle="modal" data-target="#modalUsuarios">
+                    <mat-icon>search</mat-icon>
+                  </button> -->
+                  <mat-hint>
+                    <span class="text-danger">Digite la identificación del beneficiario + ENTER</span>
+                  </mat-hint>
+                </mat-form-field>
+              </div>
+            </div>
+
+
+
+
+            <div class="row px-4">
+              <div class="col-md-6">
+                <mat-form-field class="example-full-width">
+                  <input matInput placeholder="Puesto" disabled [(value)]="puestoSeleccionado.puesto.numeropuesto">
+                  <mat-hint *ngIf="puestoSeleccionado.puesto.numeropuesto == ''">
+                    <span class="text-danger">El puesto es requerido</span>
+                  </mat-hint>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-6">
+                <mat-form-field class="example-full-width">
+                  <input matInput placeholder="Beneficiario" disabled [(value)]="beneficiarioSeleccionado.nombrebeneficiario">
+                  <mat-hint *ngIf="beneficiarioSeleccionado.nombrebeneficiario == ''">
+                    <span class="text-danger">El beneficiario es requerido</span>
+                  </mat-hint>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Formulario -->
+            <form [formGroup]="asignacionPuestoForm" (ngSubmit)="guardarCambios()" class="px-4">
+
+              <div class="form-group">
+                <div class="form-row">
+
+                  <div class="col-md-6 mx-auto">
+                    <mat-form-field class="example-full-width">
+                      <input matInput type="text" placeholder="Digite numero resolución" id="numeroresolucion" name="numeroresolucion"
+                        formControlName="numeroresolucion">
+                      <mat-error *ngIf="asignacionPuestoForm.get('numeroresolucion').hasError('required')">
+                        El numero de resolución es requerido
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-6 mx-auto">
+                    <mat-form-field class="example-full-width">
+                      <input matInput type="number" placeholder="Digite el valor tarifa puesto" id="valortarifapuesto"
+                        name="valortarifapuesto" formControlName="valortarifapuesto">
+                      <mat-error *ngIf="asignacionPuestoForm.get('valortarifapuesto').hasError('required')">
+                        El valor de la tarifa es requerido
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                </div>
+              </div>
+              <!-- (asignacionPuestoForm.asignacionpuestoactivo.value == true) ? 'Activa' : 'Inactiva' -->
+
+              <div class="form-group">
+                <div class="form-row">
+                  <div class="col-md-6 mx-auto">
+                    <mat-form-field class="example-full-width">
+                      <input matInput type="text" placeholder="Digite estado asignacion puesto" id="estadoasignacionpuesto"
+                        name="estadoasignacionpuesto" formControlName="estadoasignacionpuesto">
+                      <mat-error *ngIf="asignacionPuestoForm.get('estadoasignacionpuesto').hasError('required')">
+                        El estado de asignación de puesto es requerido
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-6 mx-auto mt-3">
+                    <mat-slide-toggle formControlName="asignacionpuestoactivo">
+                      Asignación
+                      {{(asignacionPuestoForm.value.asignacionpuestoactivo === true) ? 'Activa' : 'Inactiva'}}
+                    </mat-slide-toggle>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div class="form-row">
+                  <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="submit" [disabled]="validarFormulario()"
+                    *ngIf="!banderaEditar">
+                    Guardar
+                  </button>
+
+                  <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="submit" [disabled]="validarFormulario()"
+                    *ngIf="banderaEditar">
+                    Actualizar
+                  </button>
+
+                  <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="button" (click)="cancelarEdicion()">
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </form>
+            <!-- Fin Formulario -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Classic Modal Beneficiarios -->
+    <div class="modal fade" id="modalBeneficiario" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content bg-light">
+          <div class="modal-header">
+            <h4 class="modal-title">Seleccione un Beneficiario</h4>
+            <button mat-button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+              <i class="material-icons">clear</i>
+            </button>
+          </div>
+          <div class="modal-body">
+
+            <div data-notify="container" *ngIf="(beneficiariosEncontrados.length === 0)" class="alert alert-warning alert-with-icon">
+              <i class="material-icons" data-notify="icon">warning</i>
+              <button mat-button type="button" class="close" aria-label="Close" data-dismiss="modal" (click)="filtroIdBeneficiario=''">
+                <i class="material-icons">close</i>
+              </button>
+              <span data-notify="message">
+                <b>Info:</b> No existe ningun usuario con la identificación: "{{filtroIdBeneficiario}}"
+              </span>
+            </div>
+
+            <div class="card mat-elevation-z8" *ngIf="(beneficiariosEncontrados.length > 0)">
+              <div class="card-header card-header-primary">
+                <h5 class="card-title text-center">Beneficiarios con identificación <b> " {{filtroIdBeneficiario}} "</b>
+                </h5>
+              </div>
+
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead class="text-primary">
+                      <tr>
+                        <th>Nombre</th>
+                        <th>Identificación</th>
+                        <th>Codigo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let beneficiario of beneficiariosEncontrados" (click)="seleccionarBeneficiario(beneficiario)"
+                        data-dismiss="modal">
+                        <td>{{ beneficiario.nombrebeneficiario }}</td>
+                        <td>{{ beneficiario.identificacionbeneficiario }}</td>
+                        <td>{{ beneficiario.codigobeneficiario }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--  End Modal -->
+
+    <!-- Classic Modal Puestos -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content bg-light">
+          <div class="modal-header">
+            <h4 class="modal-title">Seleccione un Puesto</h4>
+            <button mat-button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+              <i class="material-icons">clear</i>
+            </button>
+          </div>
+          <div class="modal-body">
+
+            <div data-notify="container" *ngIf="(puestosEncontrados.length === 0)" class="alert alert-warning alert-with-icon">
+              <i class="material-icons" data-notify="icon">warning</i>
+              <button mat-button type="button" class="close" aria-label="Close" data-dismiss="modal" (click)="filtroPuestos=''">
+                <i class="material-icons">close</i>
+              </button>
+              <span data-notify="message">
+                <b>Info:</b> No existen puestos con el número: <b> " {{filtroPuestos}} "</b>
+              </span>
+            </div>
+
+            <div class="card mat-elevation-z8" *ngIf="(puestosEncontrados.length > 0)">
+              <div class="card-header card-header-primary">
+                <h5 class="card-title text-center">Puestos con numero: <b> " {{filtroPuestos}} "</b></h5>
+              </div>
+
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead class="text-primary">
+                      <tr>
+                        <th>Puesto Numero</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let puesto of puestosEncontrados" (click)="seleccionarPuesto(puesto)" data-dismiss="modal">
+                        <td>{{ puesto.numeropuesto }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--  End Modal -->
+  </div>
+
+  <!-- Classic Modal Beneficiarios -->
+  <div class="modal fade" id="modalCancelarAsignacion" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-light">
+        <div class="modal-header">
+          <h4 class="modal-title"></h4>
+          <button mat-button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            <i class="material-icons">clear</i>
+          </button>
+        </div>
+        <div class="modal-body">
+
+          <div class="card mat-elevation-z8">
+            <div class="card-header card-header-primary">
+              <h5 class="card-title text-center">
+                Opciones de desactivación
+              </h5>
+            </div>
+
+            <div class="card-body">
+              <div class="row mt-4">
+                <div class="col-sm-12">
+                  <mat-form-field>
+                    <mat-select placeholder="Seleccione la opción de desactivación" [(ngModel)]="opcionDesactivacion">
+                      <mat-option value='Terminado' selected>Terminado</mat-option>
+                      <mat-option value='Expulsado'>Expulsado</mat-option>
+                      <mat-option value='Abandonado'>Abandonado</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div class="row justify-content-around mt-4">
+                <button mat-raised-button type="button" class="btn btn-success btn-round col-md-5" (click)="confirmarCancelacion()">Continuar</button>
+                <button mat-raised-button type="button" class="btn btn-danger btn-round col-md-5" data-dismiss="modal"
+                  (click)="asignacionDesactivar = null">Cancelar</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+  <!--  End Modal -->
+</div>

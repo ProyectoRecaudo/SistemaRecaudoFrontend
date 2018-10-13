@@ -1,0 +1,167 @@
+<div class="card">
+
+    <div class="card-header card-header-danger">
+        <h3 class="card-title text-center">Historico de recibos de pesaje</h3>
+    </div>
+    <div class="card-body">
+
+        <div class="alert alert-info">
+            <button mat-button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <i class="material-icons">close</i>
+            </button>
+            <span>
+                <b> Info - </b> Seleccione los filtros y presione Buscar para ver los historicos</span>
+        </div>
+        <!--
+                        Boton regresar
+                    -->
+        <div class="row">
+
+            <button mat-raised-button type="button" class="btn btn-primary btn-link" (click)='ocultar.emit()'>
+                <span class="btn-label">
+                    <i class="material-icons">keyboard_arrow_left</i>
+                </span>
+                Volver
+
+            </button>
+        </div>
+
+        <!--Filtros para fechas de inicio/final-->
+        <div class="row justify-content-center">
+            <div class="col-sm-3">
+
+                <mat-form-field>
+                    <input matInput [matDatepicker]="fechainicial" placeholder="Fecha inicio" [formControl]="dateinicial">
+                    <mat-datepicker-toggle matSuffix [for]="fechainicial"></mat-datepicker-toggle>
+                    <mat-datepicker #fechainicial></mat-datepicker>
+                </mat-form-field>
+
+            </div>
+            <div class="col-sm-3">
+                <mat-form-field>
+                    <input matInput [matDatepicker]="fechafinal" placeholder="Fecha final" [formControl]="datefinal">
+                    <mat-datepicker-toggle matSuffix [for]="fechafinal"></mat-datepicker-toggle>
+                    <mat-datepicker #fechafinal></mat-datepicker>
+                </mat-form-field>
+
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <mat-form-field>
+                    <mat-select id="fkidplaza" placeholder="Seleccione Plaza" name="fkidplaza" [(ngModel)]="fkidplaza">
+                        <mat-option value=''>Todos</mat-option>
+                        <mat-option [value]='consulta["pkidplaza"]' *ngFor="let consulta of consultas['plaza']">{{consulta['nombreplaza']}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div class="col-md-6 ">
+
+                <mat-form-field>
+                    <input matInput placeholder="Digite cédula tercero" type="number" [(ngModel)]="identificaciontercero">
+                    <mat-icon matSuffix>view_compact</mat-icon>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 ml-auto mr-auto">
+
+                <mat-form-field>
+                    <mat-select id="fkidtipoanimal" name="fkidtipoanimal" placeholder="Seleccione tipo de animal" [(ngModel)]="fkidtipoanimal">
+                        <mat-option value=''>Todos</mat-option>
+                        <mat-option [value]='consulta["pkidtipoanimal"]' *ngFor="let consulta of consultas['tipoanimal']">{{consulta['nombretipoanimal']}}</mat-option>
+                    </mat-select>
+
+                </mat-form-field>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-3 ml-auto mr-auto">
+                <button mat-raised-button class="btn btn-outline-primary" (click)="buscarRecibo(0)">
+                    Buscar <i class="material-icons">search</i>
+                </button>
+            </div>
+        </div>
+
+        <!--Mensaje de confirmacion-->
+        <div data-notify="container" *ngIf="mensajedatos" class="alert alert-warning alert-with-icon">
+            <i class="material-icons" data-notify="icon">warning</i>
+            <button mat-button type="button" class="close" aria-label="Close" (click)="mensajedatos=''">
+                <i class="material-icons">close</i>
+            </button>
+            <span data-notify="message">
+                <b>Info:</b> {{mensajedatos}} </span>
+        </div>
+
+        <hr>
+        <div *ngIf="cargando">
+            Cargando Recibos puestos Fijos
+            <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+        </div>
+
+
+        <div *ngIf="datosrecibo.length!=0">
+            <div class="btn-group">
+                <button mat-raised-button type="button" class="btn btn-primary" [disabled]='paginaactual==1' (click)='cambiarPagina(true)'>
+                    <span class="btn-label">
+                        <i class="material-icons">keyboard_arrow_left</i>
+                    </span>
+                    Anterior
+
+                </button>
+                <button mat-raised-button type="button" class="btn btn-primary" (click)="cambiarPagina(false)" [disabled]='paginaactual==totalpaginas'>
+                    Siguiente
+                    <span class="btn-label btn-label-right">
+                        <i class="material-icons">keyboard_arrow_right</i>
+                    </span>
+                </button>
+            </div>
+
+            <div class="row">
+                <h3 class="badge badge-rose col-md-6 ml-auto mr-auto">Pagina {{paginaactual}} de {{totalpaginas}}, Total
+                    elementos {{totalitems}} </h3>
+            </div>
+
+            <hr>
+            <div class="row">
+                <div *ngFor="let dato of datosrecibo; let i=index" class="col-md-4">
+                    <!-- <div [ngClass]="{'row': i==0 || ((i%3)==0)}" >  -->
+
+                    <div>
+                        <app-recibo-dinamico [datos]='dato' [i]='i' [cabeceras]='cabeceras' (enviarObjeto)='recibirObjeto($event)'></app-recibo-dinamico>
+                    </div>
+                    <!-- </div> -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div *ngIf="datosmodal.length!=0">
+
+    <div class="modal fade" id="exampleModalLong">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Detalle del recibo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <app-modal-confirmacion [datos]='datosmodal' ></app-modal-confirmacion>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"> <i class="material-icons">cancel</i>Cancelar</button>
+                    <button type="button" class="btn btn-success" (click)="imprimirRecibo()"><i class="material-icons">print</i>Imprimir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

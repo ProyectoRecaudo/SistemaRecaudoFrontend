@@ -1,0 +1,51 @@
+<h1 mat-dialog-title>Registro de equipo de computo</h1>
+
+<h4 mat-dialog-title>Por favor ingrese la información del equipo</h4>
+
+<mat-dialog-content [formGroup]="nuevoEquipoForm">
+
+    <mat-form-field>
+        <input matInput placeholder="Nombre de usuario" disabled="true" [value]="nombreusuario">
+    </mat-form-field>
+
+    <mat-form-field>
+        <input matInput placeholder="Identificación" disabled="true" [value]="identificador">
+    </mat-form-field>
+
+    <mat-form-field>
+        <input matInput type="text" placeholder="Digite codigo de equipo " formControlName="codigoequipo">
+    </mat-form-field>
+
+    <mat-form-field>
+        <input matInput type="text" placeholder="Digite nombre de equipo " formControlName="nombrequipo">
+        <mat-error *ngIf="nuevoEquipoForm.get('nombrequipo').hasError('required')">
+            El nombre es <strong>requerido</strong>
+        </mat-error>
+    </mat-form-field>
+
+    <mat-form-field>
+        <input matInput type="text" placeholder="Digite descripcion de equipo " formControlName="descripcionequipo">
+    </mat-form-field>
+
+
+
+</mat-dialog-content>
+<div [hidden]="!guardando">
+    <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+    Guardando equipo
+</div>
+
+<div class="alert alert-warning alert-with-icon" data-notify="container" *ngIf="msg">
+    <i class="material-icons" data-notify="icon">warning</i>
+    <button mat-button type="button" class="close" aria-label="Close" (click)="msg=''">
+        <i class="material-icons">close</i>
+    </button>
+    <span data-notify="message">
+        <b>Info:</b> {{msg}} </span>
+</div>
+
+
+<div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">Cancelar</button>
+    <button mat-button cdkFocusInitial (click)="registrarEquipo()">Guardar equipo</button>
+</div>

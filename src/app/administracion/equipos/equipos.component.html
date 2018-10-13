@@ -1,0 +1,145 @@
+<div class="main-content" *ngIf="tablaequipo">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="card ">
+          <div class="card-header card-header-danger">
+            <h4 class="card-title">Tabla de Equipos</h4>
+            <p class="card-category">Registro de Equipos</p>
+          </div>
+
+          <div class="card-body">
+            <!--Filtros  -->
+            <div class="row">
+
+              <!--Input filtro de un campo-->
+              <div class="col-sm-4">
+                <mat-form-field>
+                  <input matInput [(ngModel)]="filtroNombreEquipo" (keyup)="aplicarFiltro()" placeholder="Buscar por nombre de equipo">
+                  <button mat-button *ngIf="filtroNombreEquipo" matSuffix mat-icon-button aria-label="Clear" (click)="clearInput()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </mat-form-field>
+              </div>
+
+              <!--Fin filtro input -->
+              <!--Filtro boton  toggle inhabilidatos -->
+              <div class="col-sm-4">
+                <mat-slide-toggle (change)="aplicarFiltro();cambiarMensajeToggle();" [(ngModel)]="toggleActDesc">{{msjToggle}}</mat-slide-toggle>
+              </div>
+              <!--Fin Filtro boton toggle -->
+              <!--Fin Filtros-->
+
+
+            </div>
+
+            <!--Mensaje de confirmacion-->
+            <div data-notify="container" *ngIf="mensaje" [class]="claseDinamic">
+              <i class="material-icons" data-notify="icon">{{iconAlert}}</i>
+              <button mat-button type="button" class="close" aria-label="Close" (click)="closeDialog()">
+                <i class="material-icons">close</i>
+              </button>
+              <span data-notify="message">
+                <b>Info:</b> {{mensaje}} </span>
+              <!-- <div class="col-sm-4">
+                <button mat-raised-button class="btn btn-outline-primary mb-3" (click)="consultarZonaes()" *ngIf="respuesta=='error'">Intentar
+                  de nuevo
+                </button>
+              </div> -->
+            </div>
+            <!--
+                <mat-progress-bar mode="indeterminate" class="mt-2 mb-4" [hidden]="!creandoUsuario"></mat-progress-bar>
+              -->
+
+            <!--Fin mensaje confirmacion-->
+            <div *ngIf="respuesta==null">
+              Cargando Equipos
+              <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+            </div>
+
+
+            <div class="row">
+
+              <div class="col-sm-4 ">
+                <button mat-raised-button class="btn btn-outline-primary mb-3" type="submit" (click)="ocultarTablaEquipo()" [disabled]="botonBloqueo">Nuevo
+                  Equipo
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive mat-elevation-z8">
+              <mat-table [dataSource]="dataSource" matSort class="table table-full-width">
+                <ng-container matColumnDef="identificacionequipo">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Identificación </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.equipoactivo }"> {{element.identificacionequipo}}
+                  </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="nombrequipo">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Equipo </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.equipoactivo }"> {{element.nombrequipo}}
+                  </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="descripcionequipo">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header>Descripción</mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.equipoactivo }"> {{element.descripcionequipo}}
+                  </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="nombreusuario">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header>Usuario asignado</mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.equipoactivo }"> {{element.nombreusuario}}
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="equipoactivo">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Equipo Activo/Desactivado </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.equipoactivo }"> {{element.equipoactivo?'Activo':'Desactivado'}}
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Acciones </mat-header-cell>
+                  <mat-cell *matCellDef="let element ; let i=index">
+
+                    <button mat-icon-button matTooltip="Editar equipo" type="button" class="btn btn-info" (click)=" enviarEquipo(element) ">
+                    <i class="material-icons ">edit</i>
+                    </button>
+
+                    <button mat-icon-button matTooltip="Eliminar equipo " type="button" class="btn btn-primary" (click)="openDialog(element)">
+                      <i class="material-icons ">delete</i>
+                    </button>
+                    <div *ngIf="element.equipoactivo">
+                      <button mat-icon-button matTooltip="Desactivar equipo" type="button" class="btn btn-danger" (click)="cambiarEstado(element)">
+                        <i class="material-icons ">not_interested</i>
+                      </button>
+                    </div>
+                    <div *ngIf="!element.equipoactivo">
+                      <button mat-icon-button matTooltip="Activar equipo" type="button" class="btn btn-success" (click)="cambiarEstado(element)">
+                        <i class="material-icons ">done</i>
+                      </button>
+                    </div>
+
+
+                  </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="cabecerasColumnas"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: cabecerasColumnas;"></mat-row>
+              </mat-table>
+              <mat-paginator #paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]" [showFirstLastButtons]="true">
+              </mat-paginator>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!--Fin Tabla empelados-->
+
+    </div>
+    <!--------------------------------------------------------------------------------------------------------->
+    <!--
+      formulario para agregar o actualizar una tabla TIPO
+    -->
+
+  </div>
+</div>
+<app-equipos-agregar-editar *ngIf="formequipo" (llamarEquipo)="ocultarTablaEquipo($event)" [equipo]="equipoEdit"></app-equipos-agregar-editar>

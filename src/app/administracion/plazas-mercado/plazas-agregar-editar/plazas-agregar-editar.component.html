@@ -1,0 +1,106 @@
+<div class="main-content">
+  <div class="container-fluid">
+    <div class="col-sm-12">
+      <!--inicio formulario de nuevo Plaza-->
+      <div class="card">
+        <div class="card-header card-header-danger ">
+          <h4 class="card-title text-center">{{msjAgregarEditar}}</h4>
+          <p class="card-category text-center">*Algunos de los campos son obligatorios</p>
+        </div>
+
+        <div class="card-body">
+          <!--Mensaje de confirmacion-->
+          <div class="alert alert-warning alert-with-icon" data-notify="container" *ngIf="msg">
+            <i class="material-icons" data-notify="icon">warning</i>
+            <button mat-button type="button" class="close" aria-label="Close" (click)="closeDialog()">
+              <i class="material-icons">close</i>
+            </button>
+            <span data-notify="message">
+              <b>Info:</b> {{msg}} </span>
+          </div>
+          <mat-progress-bar mode="indeterminate" class="mt-2 mb-4" [hidden]="!creandoplaza"></mat-progress-bar>
+
+          <!--Fin mensaje confirmacion-->
+        </div>
+
+
+        <form [formGroup]="nuevoPlazaForm" (ngSubmit)="nuevaPlaza()" class="pl-5">
+
+          <div class="form-group">
+            <div class="form-row">
+
+              <div class="col pr-5">
+                <mat-form-field class="example-full-width">
+                  <input matInput type="text" placeholder="Digite codigo de la plaza" id="codigoplaza" name="codigoplaza"
+                    formControlName="codigoplaza">
+                  <mat-error *ngIf="nuevoPlazaForm.get('codigoplaza').hasError('required')">
+                    el codigo es <strong>obligatorio</strong>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col pr-5">
+                <mat-slide-toggle class="mt-3" (change)="activarDesactivarPlaza()" [checked]="active">Plaza
+                  {{textActive}} </mat-slide-toggle>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-row">
+              <div class="col pr-5">
+                <mat-form-field>
+                  <mat-select placeholder="Seleccione tipo de recaudo" id="pkidtiporecaudo" name="pkidtiporecaudo"
+                    (selectionChange)="onChangePermisos($event)" formControlName="pkidtiporecaudo" multiple>
+                    <mat-option *ngFor="let tiporecaudo of tiporecaudos" [value]=" tiporecaudo.pkidtiporecaudo">{{tiporecaudo.nombretiporecaudo}}</mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="nuevoPlazaForm.get('pkidtiporecaudo').hasError('required')">
+                    Porfavor seleccione al menos un tipo de recaudo
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col pr-5">
+                <mat-form-field class="example-full-width">
+                  <input matInput type="text" placeholder="Digite nombre de la plaza" id="nombreplaza" name="nombreplaza"
+                    formControlName="nombreplaza">
+                  <mat-error *ngIf="nuevoPlazaForm.get('nombreplaza').hasError('required')">
+                    El nombre es <strong>requerido</strong>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-row">
+              <div class="col mx-auto">
+                <p class="">
+                  Tipo recaudo Seleccionados:
+                </p>
+                <ul class="">
+                  <li *ngFor="let seleccionado of seleccionados">{{seleccionado}}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-row pr-5">
+
+              <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="submit" [disabled]="!nuevoPlazaForm.valid">{{mensajeBoton}}
+              </button>
+              <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="button" (click)="llamarPlaza.emit({cancel:'1',msj:'null'});">Cancelar</button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+      <!--
+                  <pre>Status del formulario: {{ nuevoPlazaForm.get('repetirContrasenia').hasError('') | json }}</pre>
+                  <pre>Status del formulario: {{ nuevoPlazaForm.get('repetirContrasenia').errors.validUrl | json }}</pre>
+                  Fin formulario nuevo Plaza
+                -->
+    </div>
+  </div>
+</div>

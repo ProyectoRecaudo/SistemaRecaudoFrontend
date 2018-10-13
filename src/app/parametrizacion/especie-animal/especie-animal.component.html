@@ -1,0 +1,247 @@
+<div class="main-content">
+  <div class="container-fluid">
+    <div class="row" *ngIf="mostrarTabla">
+      <div class="col-sm-12">
+        <div class="card ">
+          <div class="card-header card-header-danger">
+            <h4 class="card-title">Tabla de Especies de animales</h4>
+            <p class="card-category">Registro de Especies de animales</p>
+          </div>
+
+          <div class="card-body">
+            <!--Filtros  -->
+            <div class="row">
+
+              <!--Input filtro de un campo-->
+              <div class="col-sm-4">
+                <mat-form-field>
+                  <input matInput [(ngModel)]="filtroNombreEspecie" (keyup)="aplicarFiltro()" placeholder="Buscar por nombre de la especie">
+                  <button mat-button *ngIf="filtroNombreEspecie" matSuffix mat-icon-button aria-label="Clear" (click)="clearInput()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </mat-form-field>
+              </div>
+              <div class="col-sm-4">
+                <mat-form-field>
+                  <mat-select placeholder="buscar por tipo de animal" [(ngModel)]="tipoanimalselect" (selectionChange)="aplicarFiltro()">
+                    <mat-option value=''> Todos </mat-option>
+                    <mat-option [value]='tipoanimal.nombretipoanimal' *ngFor="let tipoanimal of tipoanimales">{{tipoanimal.nombretipoanimal}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <p>Buscando por: {{tipoanimalselect}} </p>
+              </div>
+              <!--Fin filtro input -->
+              <!--Filtro boton  toggle inhabilidatos -->
+              <div class="col-sm-4">
+                <mat-slide-toggle (change)="aplicarFiltro();cambiarMensajeToggle();" [(ngModel)]="toggleActDesc">{{msjToggle}}</mat-slide-toggle>
+              </div>
+              <!--Fin Filtro boton toggle -->
+              <!--Fin Filtros-->
+
+
+            </div>
+
+
+
+          </div>
+          <hr>
+
+          <!--Mensaje de confirmacion-->
+          <div data-notify="container" *ngIf="mensaje" [class]="claseDinamic">
+            <i class="material-icons" data-notify="icon">{{iconAlert}}</i>
+            <button mat-button type="button" class="close" aria-label="Close" (click)="closeDialog()">
+              <i class="material-icons">close</i>
+            </button>
+            <span data-notify="message">
+              <b>Info:</b> {{mensaje}} </span>
+            <div class="col-sm-4">
+              <button mat-raised-button class="btn btn-outline-primary mb-3" (click)="consultarZonaes()" *ngIf="respuesta=='error'">Intentar
+                de nuevo
+              </button>
+            </div>
+          </div>
+          <!--
+                  <mat-progress-bar mode="indeterminate" class="mt-2 mb-4" [hidden]="!creandoUsuario"></mat-progress-bar>
+                -->
+
+          <!--Fin mensaje confirmacion-->
+          <div *ngIf="respuesta==null">
+            Cargando Especies de animales
+            <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+          </div>
+
+
+          <div class="row px-4">
+            <button mat-raised-button class="btn btn-outline-primary col-sm-8 col-md-6 col-lg-6 mx-auto" type="submit" (click)="llamarFormularioAgregarEspecie()"
+              [disabled]="botonBloqueo">Nueva Especie de animal
+            </button>
+          </div>
+
+          <div class="table-responsive mat-elevation-z8 mt-4">
+            <mat-table [dataSource]="dataSource" matSort class="table table-full-width">
+              <ng-container matColumnDef="codigoespecieanimal">
+                <mat-header-cell *matHeaderCellDef mat-sort-header> Codigo especie </mat-header-cell>
+                <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.especieanimalactivo }">
+                  {{element.codigoespecieanimal}}
+                </mat-cell>
+              </ng-container>
+              <ng-container matColumnDef="nombreespecieanimal">
+                <mat-header-cell *matHeaderCellDef mat-sort-header> Nombre especie </mat-header-cell>
+                <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.especieanimalactivo }">
+                  {{element.nombreespecieanimal}}
+                </mat-cell>
+              </ng-container>
+              <ng-container matColumnDef="nombretipoanimal">
+                <mat-header-cell *matHeaderCellDef mat-sort-header>Tipo animal </mat-header-cell>
+                <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.especieanimalactivo }">
+                  {{element.nombretipoanimal}}
+                </mat-cell>
+              </ng-container>
+
+              <ng-container matColumnDef="especieanimalactivo">
+                <mat-header-cell *matHeaderCellDef mat-sort-header> Especie Activo/Desactivado </mat-header-cell>
+                <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.especieanimalactivo }">
+                  {{element.especieanimalactivo?'Activo':'Desactivado'}}
+                </mat-cell>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <mat-header-cell *matHeaderCellDef mat-sort-header> Acciones </mat-header-cell>
+                <mat-cell *matCellDef="let element ; let i=index">
+
+                  <button mat-icon-button matTooltip="Editar especie animal" type="button" class="btn btn-info" (click)="llamarFormularioAgregarEspecie(element)">
+                    <i class="material-icons ">edit</i>
+                  </button>
+
+                  <button mat-icon-button matTooltip="Eliminar especie animal" type="button" class="btn btn-primary" (click)="openDialog(element)">
+                    <i class="material-icons ">delete</i>
+                  </button>
+
+                  <div *ngIf="element.especieanimalactivo">
+                    <button mat-icon-button matTooltip="Desactivar especie animal" type="button" class="btn btn-danger"  (click)="cambiarEstadoEspecie(element)">
+                      <i class="material-icons ">not_interested</i>
+                    </button>
+
+                  </div>
+
+                  <div *ngIf="!element.especieanimalactivo">
+                    <button mat-icon-button matTooltip="Activar especie animal" type="button" class="btn btn-success"(click)="cambiarEstadoEspecie(element)">
+                        <i class="material-icons ">done</i>
+                    </button>
+
+                  </div>
+
+
+                </mat-cell>
+              </ng-container>
+
+              <mat-header-row *matHeaderRowDef="cabecerasColumnas"></mat-header-row>
+              <mat-row *matRowDef="let row; columns: cabecerasColumnas;"></mat-row>
+            </mat-table>
+            <mat-paginator #paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]" [showFirstLastButtons]="true">
+            </mat-paginator>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!--Fin Tabla empelados-->
+
+  </div>
+  <!--------------------------------------------------------------------------------------------------------->
+  <!--
+        formulario para agregar o actualizar una tabla TIPO
+        -->
+
+  <div class="col-sm-12" *ngIf="mostrarFormEspecie">
+    <!--inicio formulario de nuevo zona -->
+    <div class="card">
+      <div class="card-header card-header-danger ">
+        <h4 class="card-title text-center">{{msjAgregarEditar}}  </h4>
+        <p class="card-category text-center">*Algunos campos son obligatorios</p>
+      </div>
+
+      <div class="card-body">
+        <!--Mensaje de confirmacion-->
+        <div class="alert alert-warning alert-with-icon" data-notify="container" *ngIf="msg">
+          <i class="material-icons" data-notify="icon">warning</i>
+          <button mat-button type="button" class="close" aria-label="Close" (click)="closeDialog2()">
+            <i class="material-icons">close</i>
+          </button>
+          <span data-notify="message">
+            <b>Info:</b> {{msg}} </span>
+        </div>
+        <mat-progress-bar mode="indeterminate" class="mt-2 mb-4" [hidden]="!creandoespecie"></mat-progress-bar>
+
+        <!--Fin mensaje confirmacion-->
+      </div>
+
+
+      <form [formGroup]="nuevoEspecieForm" (ngSubmit)="editarAgregarEspecie()" class="pl-4">
+
+        <div class="form-group">
+          <div class="form-row">
+
+            <div class="col pr-4 mx-auto">
+              <mat-form-field class="example-full-width">
+                <input matInput type="text" placeholder="Digite codigo de la especie " id="codigoespecieanimal" name="codigoespecieanimal"
+                  formControlName="codigoespecieanimal">
+
+              </mat-form-field>
+            </div>
+
+
+            <div class="col pr-4 mx-auto">
+              <mat-form-field class="example-full-width">
+                <input matInput type="text" placeholder="Digite nombre de la especie " id="nombreespecieanimal" name="nombreespecieanimal"
+                  formControlName="nombreespecieanimal">
+                <mat-error *ngIf="nuevoEspecieForm.get('nombreespecieanimal').hasError('required')">
+                  El nombre es <strong>requerido</strong>
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-row">
+
+            <div class="col pr-4 mx-auto">
+              <mat-slide-toggle (change)="activarDesactivarespecie()" [checked]="active">Especie {{textActive}}
+              </mat-slide-toggle>
+            </div>
+
+            <div class="col pr-4 mx-auto mt-3">
+              <mat-form-field>
+                <mat-select placeholder="Seleccione tipo de aniamal" id="pkidtipoanimal" name="pkidtipoanimal" formControlName="pkidtipoanimal">
+                  <mat-option [value]='tipoanimal.pkidtipoanimal' *ngFor="let tipoanimal of tipoanimales">{{tipoanimal.nombretipoanimal}}</mat-option>
+                </mat-select>
+                <mat-error *ngIf="nuevoEspecieForm.get('pkidtipoanimal').hasError('required')">
+                  El tipo de animal es <strong>obligatorio</strong>
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+
+          <div class="form-group">
+            <div class="row">
+
+              <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="submit" [disabled]="!nuevoEspecieForm.valid">{{mensajeBoton}}
+              </button>
+              <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="button" (click)="llamarFormularioAgregarEspecie(null);consultarEspeciesAnimal();">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+      </form>
+
+      <!--
+                      <pre>Status del formulario: {{ nuevoEspecieForm.get('repetirContrasenia').hasError('') | json }}</pre>
+                      <pre>Status del formulario: {{ nuevoEspecieForm.get('repetirContrasenia').errors.validUrl | json }}</pre>
+                      Fin formulario nuevo zona
+                    -->
+    </div>
+  </div>
+</div>

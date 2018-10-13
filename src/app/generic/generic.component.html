@@ -1,0 +1,2 @@
+<app-tabla-generic *ngIf="ocultarTabla" (llamarFormulario)="cambiarEstados($event)" (enviarUSuario)="enviarUsuario($event)" [mensaje]="mensaje"  (llamarFormRoles)="cambiarRoles($event)"></app-tabla-generic>
+  <app-generic-agregar-editar *ngIf="ocultarAgreEdit" (llamarFormulario)="cambiarEstados($event)" [usuario]="usuario"   (enviarMensaje)="ponerMensaje($event)"></app-generic-agregar-editar>

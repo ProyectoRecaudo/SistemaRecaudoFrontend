@@ -1,0 +1,200 @@
+<div class="main-content">
+    <!-- *ngIf="!oculta" -->
+  <div class="container-fluid" >
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header card-header-danger ">
+          <h4 class="card-title text-center">Asignación de Dependientes a Puestos</h4>
+        </div>
+        <div class="card-body">
+
+          <input style="display: none" type="file" (change)="onFileChanged($event)" #fileInput>
+
+          <div class="row" *ngIf="!urlDocumento">
+            <div class="col-12">
+              <h4 class="text-center">Seleccionar documento de resolución</h4>
+            </div>
+          </div>
+
+          <div class="row" *ngIf="urlDocumento && !linkDocumento">
+            <div class="col-12">
+              <h4 class="text-center">
+                {{ urlDocumento }}
+                <button (click)="deleteFile()" *ngIf="urldocumento || linkDocumento != 'Seleccionar documento de resolución'"
+                  matTooltip="Eliminar documento" [matTooltipPosition]="'above'" class="btn btn-danger btn-link btn-sm btn-just-icon">
+                  <i class="material-icons">close</i>
+                </button>
+              </h4>
+            </div>
+          </div>
+
+          <div class="row" *ngIf="urlDocumento && linkDocumento">
+            <div class="col-12 justify-content-center">
+              <h4 class="text-center">
+                <a [href]="linkDocumento" target="_blank">{{ urlDocumento }}</a>
+                <button (click)="deleteFile()" *ngIf="urldocumento || linkDocumento != 'Seleccionar documento de resolución'"
+                  matTooltip="Eliminar documento" [matTooltipPosition]="'above'" class="btn btn-danger btn-link btn-sm btn-just-icon">
+                  <i class="material-icons">close</i>
+                </button>
+              </h4>
+            </div>
+          </div>
+
+
+          <div class="row px-5 my-3">
+              <!-- [disabled]="barraProgresoForm===true" -->
+            <button mat-button class="btn btn-outline-primary col-sm-6 mx-auto" (click)="fileInput.click()" >
+              Seleccionar
+            </button>
+          </div>
+          <hr>
+
+          <!--Mensaje de confirmacion-->
+          <div data-notify="container" *ngIf="mensajeRespuestaServidor" [class]="claseDinamic">
+            <i class="material-icons" data-notify="icon">{{iconAlert}}</i>
+            <button mat-button type="button" class="close" aria-label="Close" (click)="mensajeRespuestaServidor=''">
+              <i class="material-icons">close</i>
+            </button>
+            <span data-notify="message">
+              <b>Info:</b> {{mensajeRespuestaServidor}}
+            </span>
+          </div>
+          <!--Fin mensaje confirmacion-->
+
+          <div *ngIf="progreso">
+            <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+          </div>
+
+          <div class="row">
+
+            <mat-form-field class="col-md-6 ">
+              <input matInput placeholder="Digite número de resolución" type="text" [(ngModel)]="numeroResolucion">
+              <mat-icon matSuffix>line_style</mat-icon>
+              <mat-hint *ngIf="numeroResolucion === ''">
+                <span class="text-danger">El numero de resolución es requerido</span>
+              </mat-hint>
+            </mat-form-field>
+
+            <mat-form-field class="col-md-6 " (focusout)="consultarTercero($event.target.value)">
+              <input matInput placeholder="Digite cédula tercero" type="number" [(ngModel)]="cedula">
+              <mat-icon matSuffix>fingerprint</mat-icon>
+              <mat-hint>{{hintTercero}}</mat-hint>
+            </mat-form-field>
+
+          </div>
+
+
+          <div class="row" *ngIf="!existeDependiente">
+
+            <mat-form-field class="col-md-6 ">
+              <input matInput placeholder="Digite nombre del tercero" type="text" [(ngModel)]="nombreTercero">
+              <mat-icon matSuffix>face</mat-icon>
+              <mat-hint *ngIf="!nombreTercero">
+                <span class="text-danger">El nombre del tercero es requerido</span>
+              </mat-hint>
+            </mat-form-field>
+
+            <mat-form-field class="col-md-6">
+              <mat-icon matSuffix>donut_large</mat-icon>
+              <input matInput placeholder="Tipo del tercero" disabled [(value)]="terceroEncontrado.tipotercero">
+            </mat-form-field>
+
+          </div>
+
+          <div class="row" *ngIf="existeDependiente">
+
+            <mat-form-field class="col-md-6">
+              <mat-icon matSuffix>face</mat-icon>
+              <input matInput placeholder="Nombre del tercero" disabled [(value)]="terceroEncontrado.nombretercero">
+            </mat-form-field>
+
+            <mat-form-field class="col-md-6">
+              <mat-icon matSuffix>donut_large</mat-icon>
+              <input matInput placeholder="Tipo del tercero" disabled [(value)]="terceroEncontrado.tipotercero">
+            </mat-form-field>
+
+          </div>
+
+          <div class="row justify-content-between my-3">
+            <button mat-button class="btn btn-outline-success col-sm-5 mx-auto" [disabled]="" (click)="asignarDependiente()">
+              {{ existeDependiente ? 'Asignar' : 'Guardar y Asignar'}}
+            </button>
+
+            <button mat-button class="btn btn-outline-danger col-sm-5 mx-auto" (click)="volverAsignacionPuesto()">
+              Cancelar
+            </button>
+          </div>
+          <hr>
+          <div class="card">
+            <div class="card-header card-header-primary ">
+              <h4 class="card-title text-center">Dependientes Asignados</h4>
+            </div>
+            <div class="card-body">
+              <div class="row mb-4">
+                <button mat-button class="btn btn-outline-info col-sm-8 mx-auto " (click)="volverAsignacionPuesto()">
+                  Volver a asignación de puestos
+                </button>
+              </div>
+              <!-- Tabla de Terceros del puesto -->
+              <div class="row px-2">
+
+                <div class="table-responsive mat-elevation-z8">
+
+                  <mat-table [dataSource]="dataSource" matSort class="table table-full-width">
+
+                    <ng-container matColumnDef="identificaciontercero">
+                      <mat-header-cell *matHeaderCellDef mat-sort-header> Identificación </mat-header-cell>
+                      <mat-cell *matCellDef="let element">
+                        {{ element.identificaciontercero }}
+                      </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="nombretercero">
+                      <mat-header-cell *matHeaderCellDef mat-sort-header> Nombre </mat-header-cell>
+                      <mat-cell *matCellDef="let element">
+                        {{ element.nombretercero }}
+                      </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="tipotercero">
+                      <mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </mat-header-cell>
+                      <mat-cell *matCellDef="let element">
+                        {{ element.tipotercero }}
+                      </mat-cell>
+                    </ng-container>
+
+
+                    <ng-container matColumnDef="actions">
+                      <mat-header-cell *matHeaderCellDef mat-sort-header> Acciones </mat-header-cell>
+                      <mat-cell *matCellDef="let element ; let i=index">
+
+                        <button mat-icon-button matTooltip="Eliminar Dependiente" matTooltipClass="example-tooltip-red"
+                          aria-label="Button that shows a red tooltip" class="example-button" (click)=" eliminarDependiente(element.pkidasignaciondependiente)">
+                          <i class="material-icons text-danger">not_interested</i>
+                        </button>
+
+                      </mat-cell>
+                    </ng-container>
+
+                    <mat-header-row *matHeaderRowDef="cabecerasColumnas"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: cabecerasColumnas;"></mat-row>
+
+                  </mat-table>
+
+                  <mat-paginator #paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]" [showFirstLastButtons]="true">
+                  </mat-paginator>
+
+                </div>
+              </div>
+              <!-- FIN Tabla de asignaciones de puesto -->
+
+              <div class="row">
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

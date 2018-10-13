@@ -1,0 +1,212 @@
+<div class="main-content">
+    <div class="container-fluid" *ngIf="!oculta">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-header card-header-danger ">
+                    <h4 class="card-title text-center">Tarifa vehiculo</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row justify-content-center">
+                        <div class="col-sm-3">
+                            <mat-form-field>
+                                <mat-select placeholder="Seleccione plaza" id="fkidplaza" (selectionChange)='guardarFiltroplaza($event)'>
+                                    <mat-option value=''>Todos</mat-option>
+                                    <mat-option [value]='plaza.pkidplaza' *ngFor="let plaza of plazasmercado">{{plaza.nombreplaza}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <div class="col-sm-3">
+                            <mat-form-field>
+                                <mat-select placeholder="Seleccione tipo de vehiculo" id="fkidtipovehiculo" (selectionChange)='guardarFiltrotipo($event)'>
+                                    <mat-option value=''>Todos</mat-option>
+                                    <mat-option [value]='tipo.pkidtipovehiculo' *ngFor="let tipo of tiposvehiculo">{{tipo.nombretipovehiculo}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!--Filtro boton  toggle inhabilidatos -->
+                        <div class="col-sm-5 mt-3">
+                            <mat-slide-toggle (change)="guardarToggle();cambiarMensajeToggle();" [(ngModel)]="toggleActDesc">{{msjToggle}}</mat-slide-toggle>
+                        </div>
+                        <!--Fin Filtro boton toggle -->
+
+                    </div>
+                    <hr>
+                    <!--Mensaje de confirmacion-->
+                    <!--Mensaje de confirmacion-->
+                    <div data-notify="container" *ngIf="mensaje" [class]="claseDinamic">
+                        <i class="material-icons" data-notify="icon">{{iconAlert}}</i>
+                        <button mat-button type="button" class="close" aria-label="Close" (click)="mensaje=''">
+                            <i class="material-icons">close</i>
+                        </button>
+                        <span data-notify="message">
+                            <b>Info:</b> {{mensaje}} </span>
+                        <div class="col-sm-4">
+                            <button mat-raised-button class="btn btn-outline-primary mb-3" (click)="consultarSectores()" *ngIf="respuesta=='error'">Intentar
+                                de nuevo
+                            </button>
+                        </div>
+                    </div>
+                    <!--Fin mensaje confirmacion-->
+                    <div class="row px-4">
+                        <button mat-raised-button class="btn btn-outline-primary col-sm-8 col-md-6 col-lg-6 mx-auto" (click)="llamarFormulario(null)">
+                            Nueva Tarifa
+                        </button>
+                    </div>
+                    <app-tabla-tarifas-dinamica [url]="url" (editarTarifa)="llamarFormulario($event)"></app-tabla-tarifas-dinamica>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de registro y edicion -->
+    <div class="container-fluid" *ngIf="oculta">
+
+        <div class="col-sm-12">
+            <div class="card ">
+                <div class="card-header card-header-danger">
+                    <h4 class="card-title">{{msjAgregarEditar}}</h4>
+                    <p class="card-category"></p>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="alert alert-warning alert-with-icon" data-notify="container" *ngIf="msg">
+                        <i class="material-icons" data-notify="icon">warning</i>
+                        <button mat-button type="button" class="close" aria-label="Close" (click)="msg=''">
+                            <i class="material-icons">close</i>
+                        </button>
+                        <span data-notify="message">
+                            <b>Info:</b> {{msg}} </span>
+                    </div>
+
+
+                    <input style="display: none" type="file" (change)="onFileChanged($event)" #fileInput>
+
+                    <div class="row ">
+                        <div class="col-12">
+                            <h4 class="text-center">
+                                <a *ngIf="urldocumento" [href]="urldocumento" target="_blank"> {{documento}} </a>
+                                <a *ngIf="urldocumento==''">{{documento}} </a>
+                                <!--<i class="material-icons mr-3">person_outline</i>-->
+                                <button (click)="deleteFile()" *ngIf="urldocumento || documento!='Seleccionar documento de resolución'" mat-raised-button
+                                    type="button" matTooltip="Eliminar documento" [matTooltipPosition]="'above'" class="btn btn-danger btn-link btn-sm btn-just-icon">
+                                    <i class="material-icons">close</i>
+                                </button>
+                            </h4>
+                        </div>
+                    </div>
+
+                    <div class="row px-5 my-3">
+                        <button mat-button class="btn btn-outline-primary col-sm-6 mx-auto" (click)="fileInput.click()">
+                            Seleccionar
+                        </button>
+                    </div>
+                    <mat-progress-bar mode="indeterminate" class="mt-2 mb-4" [hidden]="!creandotarifa"></mat-progress-bar>
+                    <hr>
+                    <!-- Inicio Formulario -->
+                    <form [formGroup]="nuevoTarifaForm" (ngSubmit)="guardarActualizarCambios()" class="pl-4">
+
+                        <div class="form-group">
+                            <div class="form-row">
+                                <div class="col pr-4 mx-auto">
+                                    <mat-form-field>
+                                        <mat-select placeholder="Seleccione la plaza" id="fkidplaza" name="fkidplaza" formControlName="fkidplaza">
+                                            <mat-option *ngFor="let plaza of plazasmercado" [value]="plaza.pkidplaza">{{plaza.nombreplaza}}</mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="nuevoTarifaForm.get('fkidplaza').hasError('required')">
+                                            Seleccione al menos una <strong>Plaza</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col pr-4 mx-auto">
+                                    <mat-form-field>
+                                        <mat-select placeholder="Seleccione tipo de vehiculo" id="fkidtipovehiculo" name="fkidtipovehiculo" formControlName="fkidtipovehiculo">
+                                            <mat-option *ngFor="let tipo of tiposvehiculo" [value]="tipo.pkidtipovehiculo">{{tipo.nombretipovehiculo}}</mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="nuevoTarifaForm.get('fkidtipovehiculo').hasError('required')">
+                                            Seleccione al menos un <strong>Tipo</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-row">
+
+                                <div class="col pr-4 mx-auto ">
+                                    <mat-form-field class="example-full-width">
+                                        <input matInput type="number" placeholder="Digite Valor" id="valor" name="valor" formControlName="valor">
+                                        <mat-error *ngIf="nuevoTarifaForm.get('valor').hasError('required')">
+                                            El valor es <strong>requerido</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col pr-4 mx-auto ">
+                                    <mat-form-field class="example-full-width">
+                                        <input matInput type="text" placeholder="Digite Numero de Resolución" id="numero" name="numero" formControlName="numero">
+                                        <mat-error *ngIf="nuevoTarifaForm.get('numero').hasError('required')">
+                                            El numero de resolución es <strong>requerido</strong>
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-row">
+
+                                <div class="col pr-4 mx-auto ">
+                                    <mat-form-field>
+                                        <input matInput [matDatepicker]="fechainicial" placeholder="Fecha inicio" formControlName="dateinicial">
+                                        <mat-datepicker-toggle matSuffix [for]="fechainicial"></mat-datepicker-toggle>
+                                        <mat-datepicker #fechainicial></mat-datepicker>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col pr-4 mx-auto ">
+                                    <mat-form-field>
+                                        <input matInput [matDatepicker]="fechafinal" placeholder="Fecha final" formControlName="datefinal">
+                                        <mat-datepicker-toggle matSuffix [for]="fechafinal"></mat-datepicker-toggle>
+                                        <mat-datepicker #fechafinal></mat-datepicker>
+                                    </mat-form-field>
+
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <div class="form-row">
+                                <div class="col pr-4 mx-auto mt-3">
+                                    <mat-slide-toggle (change)="activarDesactivarTarifa()" [checked]="active">Tarifa {{textActive}}
+                                    </mat-slide-toggle>
+                                </div>
+                                <div class="col pr-4 mx-auto ">
+                                    <mat-form-field>
+                                        <textarea matInput placeholder="Descripcion" formControlName="descripcion"></textarea>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-row pr-4">
+                                <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="submit" [disabled]="!nuevoTarifaForm.valid || creandotarifa">
+                                    {{mensajeBoton}}
+                                </button>
+                                <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="button" (click)="llamarFormulario(null)">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- Fin Formulario -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Fin Formulario de registro y edicion -->
+
+
+
+</div>

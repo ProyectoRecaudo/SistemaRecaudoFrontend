@@ -1,0 +1,135 @@
+<div class="main-content" *ngIf="tablaplaza">
+  <div class="container-fluid">
+
+    <div class="row">
+      <!--Tabla plazas-->
+      <div class="col-sm-12">
+        <div class="card ">
+          <div class="card-header card-header-danger">
+            <h4 class="card-title">Tabla Plazas de Mercado</h4>
+            <p class="card-category">Registro de las Plazas de Mercado</p>
+          </div>
+
+          <div class="card-body">
+            <!--Filtros  -->
+            <div class="row justify-content-center">
+
+              <!--Input filtro de un campo-->
+              <div class="col-sm-5">
+                <mat-form-field>
+                  <input matInput [(ngModel)]="filtroNombre" (keyup)="aplicarFiltro()" placeholder="Buscar por nombre de la plaza">
+                  <button mat-button *ngIf="filtroNombre" matSuffix mat-icon-button aria-label="Clear" (click)="clearInput()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </mat-form-field>
+              </div>
+              <!--Fin filtro input -->
+              <!--Filtro boton  toggle inhabilidatos -->
+              <div class="col-sm-5">
+                <mat-slide-toggle class="mt-3" (change)="aplicarFiltro();cambiarMensajeToggle();" [(ngModel)]="toggleActDesc">{{msjToggle}}</mat-slide-toggle>
+              </div>
+              <!--Fin Filtro boton toggle -->
+              <!--Fin Filtros-->
+            </div>
+            <hr>
+            <!--Mensaje de confirmacion-->
+            <div data-notify="container" *ngIf="mensaje" [class]="claseDinamic">
+              <i class="material-icons" data-notify="icon">{{iconAlert}}</i>
+              <button mat-button type="button" class="close" aria-label="Close" (click)="closeDialog()">
+                <i class="material-icons">close</i>
+              </button>
+              <span data-notify="message">
+                <b>Info:</b> {{mensaje}} </span>
+              <div class="col-sm-4">
+                <button mat-raised-button class="btn btn-outline-primary mb-3" (click)="consultarPlazas();mensaje=''"
+                  *ngIf="respuesta=='error'">Intentar
+                  nuevamente
+                </button>
+              </div>
+            </div>
+            <!--
+              <mat-progress-bar mode="indeterminate" class="mt-2 mb-4" [hidden]="!creandoplaza"></mat-progress-bar>
+            -->
+
+            <!--Fin mensaje confirmacion-->
+            <div *ngIf="respuesta==null">
+              Cargando plazas de mercado
+              <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+            </div>
+
+            <div class="row px-4">
+              <button mat-raised-button class="btn btn-outline-primary mb-3 col-sm-8 col-md-6 col-lg-6 mx-auto" type="submit"
+                (click)="ocultarTablaPlaza()" [disabled]="botonBloqueo">Nueva
+                plaza
+              </button>
+            </div>
+
+            <div class="table-responsive mat-elevation-z8">
+              <mat-table [dataSource]="dataSource" matSort class="table table-full-width">
+                <ng-container matColumnDef="codigoplaza">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Codigo </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.getPlazaactivo() }">
+                    {{element.getCodigoplaza()}}
+                  </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="nombreplaza">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.getPlazaactivo() }">
+                    {{element.getNombreplaza()}}
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="plazaactivo">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Plaza activo/inactivo </mat-header-cell>
+                  <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.getPlazaactivo() }">
+                    {{element.getPlazaactivo()?'Activo':'Desactivado'}}
+                  </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="actions">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header> Acciones </mat-header-cell>
+                  <mat-cell *matCellDef="let element ; let i=index">
+
+                    <button mat-icon-button matTooltip="Editar plaza" type="button" class="btn btn-info" (click)="enviarPlaza(element)">
+                      <i class="material-icons ">edit</i>
+                    </button>
+
+                    <button mat-icon-button matTooltip="Eliminar Plaza" type="button" class="btn btn-primary" (click)="openDialog(element)">
+                      <i class="material-icons ">delete</i>
+                    </button>
+
+                    
+                    <div *ngIf="element.getPlazaactivo()">
+
+                      <button mat-icon-button matTooltip="Desactivar Plaza" type="button" class="btn btn-danger" (click)="cambiarEstado(element)">
+                      <i class="material-icons ">not_interested</i>
+                    </button>
+                  </div>
+                    
+                    <div *ngIf="!element.getPlazaactivo()">
+
+                      <button mat-icon-button matTooltip="Activar Plaza" type="button" class="btn btn-success" (click)="cambiarEstado(element)">
+                      <i class="material-icons ">done</i>
+                    </button>
+                  </div>
+                    
+
+                  </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="cabecerasColumnas"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: cabecerasColumnas;"></mat-row>
+              </mat-table>
+              <mat-paginator #paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]" [showFirstLastButtons]="true">
+              </mat-paginator>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!--Fin Tabla empelados-->
+
+
+    </div>
+  </div>
+</div>
+<app-plazas-agregar-editar *ngIf="formplaza" (llamarPlaza)="ocultarTablaPlaza($event)" [plaza]="plazaEdit"></app-plazas-agregar-editar>

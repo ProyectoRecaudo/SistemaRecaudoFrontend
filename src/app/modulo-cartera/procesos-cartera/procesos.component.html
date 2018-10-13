@@ -1,0 +1,86 @@
+<div class="main-content">
+    <div class="container-fluid">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-header card-header-danger ">
+                    <h4 class="card-title text-center">Procesos y Cartera</h4>
+                </div>
+                <div class="card-body">
+
+                    <div class="alert alert-info">
+                        <button mat-button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <i class="material-icons">close</i>
+                        </button>
+                        <span>
+                            <b> Info - </b> Seleccione los filtros y presione buscar para ver los resultados en una tabla</span>
+                    </div>
+
+
+
+                    <form [formGroup]="procesosForm">
+
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <mat-form-field>
+                                    <mat-select placeholder="Seleccione plaza" id="fkidplaza" formControlName="fkidplaza" (selectionChange)="consultarSectores($event.value)">
+                                        <mat-option value=''>Todos</mat-option>
+                                        <mat-option [value]='consulta["pkidplaza"]' *ngFor="let consulta of consultas['plaza']">{{consulta['nombreplaza']}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-sm-5">
+                                <mat-form-field>
+                                    <mat-select placeholder="Seleccione Sector" id="fkidsector" formControlName="fkidsector">
+                                        <mat-option value=''>Todos</mat-option>
+                                        <mat-option [value]='sector.pkidsector' *ngFor="let sector of sectores">{{sector.nombresector}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <mat-form-field>
+                                    <input matInput placeholder="Buscar por nombre de abogado" formControlName="filtro1">
+                                    <button mat-button *ngIf="procesosForm.get('filtro1').value" matSuffix mat-icon-button aria-label="Clear" (click)="procesosForm.get('filtro1').setValue('')">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-sm-5">
+                                <mat-form-field>
+                                    <input matInput placeholder="Buscar por C.C de Beneficiario" formControlName="filtro2" type="number">
+                                    <button mat-button *ngIf="procesosForm.get('filtro2').value" matSuffix mat-icon-button aria-label="Clear" (click)="procesosForm.get('filtro2').setValue('')">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- <div class="row">
+                            <div class="col-md-3 ml-auto mr-auto">
+                                <button class="btn btn-outline-primary btn-round" (click)="buscarRecibo()">
+                                    <i class="material-icons">search</i> Buscar
+                                </button>
+                            </div>
+                        </div> -->
+
+                    </form>
+                    <div class="card-body">
+                        <!--Mensaje de confirmacion carga de datos en el select-->
+                        <div data-notify="container" *ngIf="mensajedatos" class="alert alert-warning alert-with-icon">
+                            <i class="material-icons" data-notify="icon">warning</i>
+                            <button mat-button type="button" class="close" aria-label="Close" (click)="mensajedatos=''">
+                                <i class="material-icons">close</i>
+                            </button>
+                            <span data-notify="message">
+                                <b>Info:</b> {{mensajedatos}} </span>
+                        </div>
+
+                        <hr>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

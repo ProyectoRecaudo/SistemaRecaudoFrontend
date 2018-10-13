@@ -1,0 +1,240 @@
+<div class="main-content">
+    <div class="container-fluid">
+        <!-- Tabla de visualización de puertas -->
+        <div class="row" *ngIf="!muestraTabla">
+            <!--Tabla puertas-->
+            <div class="col-sm-12">
+                <div class="card ">
+                    <div class="card-header card-header-danger">
+                        <h4 class="card-title">Tabla Puertas</h4>
+                        <p class="card-category">Registro de las Puertas</p>
+                    </div>
+
+                    <div class="card-body">
+                        <!--Filtros  -->
+                        <div class="row justify-content-center">
+                            <!--Input filtro de un campo-->
+                            <div class="col-md-4">
+                                <mat-form-field>
+                                    <input matInput [(ngModel)]="filtroNombre" (keyup)="aplicarFiltro()" placeholder="Buscar por nombre de la puerta">
+                                    <button mat-button *ngIf="filtroNombre" matSuffix mat-icon-button aria-label="Clear"
+                                        (click)="clearInput()">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="col-md-3">
+                                <mat-form-field>
+                                    <mat-select placeholder="buscar por plaza" [(ngModel)]="plazaselect"
+                                        (selectionChange)="aplicarFiltro()">
+                                        <mat-option value=''> Todos </mat-option>
+                                        <mat-option [value]='plaza.nombreplaza' *ngFor="let plaza of plazas">{{plaza.nombreplaza}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="col-md-5">
+                                <mat-slide-toggle class="mt-3" (change)="aplicarFiltro();cambiarMensajeToggle();" [(ngModel)]="estadoToggle">
+                                        {{msjToggle}}
+                                </mat-slide-toggle>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <!--Mensaje de confirmacion-->
+                                <div data-notify="container" *ngIf="mensaje" [class]="claseDinamic">
+                                    <i class="material-icons" data-notify="icon">{{iconAlert}}</i>
+                                    <button mat-button type="button" class="close" aria-label="Close" (click)="closeDialog()">
+                                        <i class="material-icons">close</i>
+                                    </button>
+                                    <span data-notify="message">
+                                        <b>Info:</b> {{mensaje}} </span>
+                                    <div class="col-sm-4">
+                                        <button mat-raised-button class="btn btn-outline-primary mb-3" (click)="consultarZonaes()"
+                                            *ngIf="respuesta=='error'">Intentar
+                                            de nuevo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!--Fin mensaje confirmacion-->
+                        <div *ngIf="respuesta==null">
+                            Cargando Puertas
+                            <mat-progress-bar mode="indeterminate" class="mt-2 mb-4"></mat-progress-bar>
+                        </div>
+
+                        <div class="row px-4">
+                            <button mat-raised-button class="btn btn-outline-primary col-sm-8 col-md-6 col-lg-6 mx-auto"
+                                (click)="muestraOcultaTabla()">
+                                Nueva puerta
+                            </button>
+                        </div>
+
+                        <div class="row mt-3">
+
+                            <div class="table-responsive mat-elevation-z8">
+
+                                <mat-table [dataSource]="dataSource" matSort class="table table-full-width">
+                                    <ng-container matColumnDef="codigopuerta">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header> Codigo </mat-header-cell>
+                                        <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.puertaactivo }">
+                                            {{element.codigopuerta}}
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="nombrepuerta">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header> Nombre </mat-header-cell>
+                                        <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.puertaactivo }">
+                                            {{element.nombrepuerta}}
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="puertaactivo">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header> Activo/Inactivo
+                                        </mat-header-cell>
+                                        <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.puertaactivo }">
+                                            {{element.puertaactivo}}
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="fkidplaza">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header> Plaza </mat-header-cell>
+                                        <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element.puertaactivo }">
+                                            {{element.nombreplaza}}
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="actions">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header> Acciones </mat-header-cell>
+                                        <mat-cell *matCellDef="let element ; let i=index">
+
+                                            <button mat-icon-button matTooltip="Editar Puerta" type="button" class="btn btn-info"
+                                                (click)="editarPuerta(element)"> <i class="material-icons ">edit</i>
+                                            </button>
+
+                                            <button mat-icon-button matTooltip="Eliminar Puerta" type="button" class="btn btn-primary"
+                                                (click)="openDialog(element)">
+                                                <i class="material-icons ">delete</i>
+                                            </button>
+
+                                            <div *ngIf="element.puertaactivo">
+
+                                                <button mat-icon-button matTooltip="Desactivar Puerta" type="button"
+                                                    class="btn btn-danger" (click)="desactivarPuerta(element)">
+                                                    <i class="material-icons ">not_interested</i>
+                                                </button>
+                                            </div>
+
+                                            <div *ngIf="!element.puertaactivo">
+
+                                                <button mat-icon-button matTooltip="Desactivar Puerta" type="button"
+                                                    class="btn btn-success" (click)="desactivarPuerta(element)">
+                                                    <i class="material-icons ">done</i>
+                                                </button>
+                                            </div>
+
+
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <mat-header-row *matHeaderRowDef="cabecerasColumnas"></mat-header-row>
+                                    <mat-row *matRowDef="let row; columns: cabecerasColumnas;"></mat-row>
+                                </mat-table>
+
+                                <mat-paginator #paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]"
+                                    [showFirstLastButtons]="true">
+                                </mat-paginator>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Fin de la tabla -->
+
+        <!-- Formulario de registro o edición de puertas -->
+        <div class="row" *ngIf="muestraTabla">
+
+            <div class="col-sm-12">
+                <!--inicio formulario de nuevo puerta-->
+                <div class="card">
+                    <div class="card-header card-header-danger ">
+                        <h4 class="card-title text-center">Agregar una nueva puerta</h4>
+                        <!-- <p class="card-category text-center">*Todos los campos son obligatorios</p> -->
+                    </div>
+
+                    <div class="card-body">
+                        <form [formGroup]="puertasForm" (ngSubmit)="guardarCambios()" class="pl-4">
+
+                            <div class="form-group">
+                                <div class="form-row">
+                                    <div class="col pr-4 mx-auto">
+                                        <mat-form-field class="example-full-width">
+                                            <input matInput type="text" placeholder="Digite codigo de la puerta" id="codigopuerta"
+                                                name="codigopuerta" formControlName="codigopuerta">
+                                        </mat-form-field>
+                                    </div>
+
+                                    <div class="col pr-4 mx-auto mt-3">
+                                        <mat-slide-toggle (change)="cambiarEstadoForm()" formControlName="puertaactivo">
+                                            Puerta {{textActive}}
+                                        </mat-slide-toggle>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="form-row">
+                                    <div class="col pr-4 mx-auto">
+                                        <mat-form-field>
+                                            <mat-select placeholder="Seleccione la plaza" id="fkidplaza" name="fkidplaza"
+                                                formControlName="fkidplaza">
+                                                <mat-option *ngFor="let plaza of plazas" [value]="plaza.pkidplaza">{{plaza.nombreplaza}}</mat-option>
+                                            </mat-select>
+                                            <mat-error *ngIf="puertasForm.get('fkidplaza').hasError('required')">
+                                                Seleccione al menos una <strong>Plaza</strong>
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <div class="col pr-4 mx-auto ">
+                                        <mat-form-field class="example-full-width">
+                                            <input matInput type="text" placeholder="Digite nombre de la puerta" id="nombrepuerta"
+                                                name="nombrepuerta" formControlName="nombrepuerta">
+                                            <mat-error *ngIf="puertasForm.get('nombrepuerta').hasError('required')">
+                                                El nombre es <strong>requerido</strong>
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                <div class="form-row pr-4">
+                                    <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="submit"
+                                        [disabled]="!puertasForm.valid">
+                                        Guardar
+                                    </button>
+                                    <button mat-button class="btn btn-outline-danger col-sm-4 mx-auto" type="button"
+                                        (click)="cancelarEdicion()">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- Fin del Formulario -->
+    </div>
+</div>

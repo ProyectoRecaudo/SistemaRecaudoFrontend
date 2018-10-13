@@ -1,0 +1,32 @@
+<div class="card">
+    <div class="card-header">
+        <div [class]="clase">
+            <h4 class="card-title">{{ cabeceras[0].e + datos[cabeceras[0].ie] }}</h4>
+            <p class="card-category"> {{datos[cabeceras[1].ie]}}</p>
+        </div>
+    </div>
+
+    <div class="card-body table-full-width">
+
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <tbody>
+                    <tr *ngFor="let item of cabeceras; let j=index">
+                        <td *ngIf="j!=0 && j!=1 && item.s!=false">{{item.e}}</td>
+                        <td *ngIf="j!=0 && j!=1 && item.s!=false">{{datos[item.ie]}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="row">
+            <button mat-raised-button class="btn btn-primary btn-link  btn-sm col-sm-4 ml-auto mr-auto" (click)="mostrarModalPagar()">
+                <i class="material-icons">money</i> Pagar</button>
+            <button mat-raised-button class="btn btn-primary btn-link  btn-sm col-sm-4 ml-auto mr-auto" (click)='mostrarModal()'>
+                <i class="material-icons">remove_red_eye</i> Ver detalle
+            </button>
+        </div>
+
+    </div>
+
+</div>

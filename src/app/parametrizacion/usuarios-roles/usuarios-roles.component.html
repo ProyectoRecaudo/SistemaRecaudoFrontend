@@ -1,0 +1,19 @@
+
+    
+    <app-tabla-usuarios *ngIf="ocultarTabla" (llamarFormulario)="cambiarEstados($event)" (enviarUSuario)="enviarUsuario($event)" [mensaje]="mensaje"  (llamarFormRoles)="cambiarRoles($event)"></app-tabla-usuarios>
+    <app-user-agregar-editar *ngIf="ocultarAgreEdit" (llamarFormulario)="cambiarEstados($event)" [usuario]="usuario"   (enviarMensaje)="ponerMensaje($event)"></app-user-agregar-editar>
+
+
+    <app-tabla-roles *ngIf="ocultarTablaRoles" (llamarFormularioAgregarRol)="llamarFormAgregarRol($event)" (llamarFormUsuarios)="cambiarRoles($event)"  [mensaje]="mensaje2" 
+    (enviarRol)="enviarRol($event)"></app-tabla-roles>
+    <app-roles-agregar-editar *ngIf="ocultarAgreEditRoles" (llamarTablaRol)="llamarFormAgregarRol($event)" [rol]="rol" 
+    (enviarMensaje)="ponerMensajeRol($event)" ></app-roles-agregar-editar>
+
+<!--
+    parametros comentados de roles-agregar-editar
+    
+-->
+<!--
+    parametros comentados de tabla-roles
+   "
+-->

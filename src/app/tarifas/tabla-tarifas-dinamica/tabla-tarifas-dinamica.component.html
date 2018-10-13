@@ -1,0 +1,27 @@
+<div class="col-sm-12">
+  <div class="table-responsive mat-elevation-z8">
+    <mat-table [dataSource]="dataSource" matSort>
+      <div *ngFor="let cabecera of cabeceras;let indice=index">
+        <ng-container *ngIf="cabecera.nombrecampo!='actions'" matColumnDef="{{cabecera.nombrecampo}}">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>{{cabecera.nombreetiqueta}}</mat-header-cell>
+          <mat-cell *matCellDef="let element" [ngClass]="{'table-danger': !element[url.substring(1)+'activo'] }"><span [outerHTML]="element[cabecera.nombrecampo] | DatosPipe"></span>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container *ngIf="cabecera.nombrecampo=='actions'" matColumnDef="{{cabecera.nombrecampo}}" stickyEnd>
+          <mat-header-cell *matHeaderCellDef>Acciones</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+
+            <button mat-icon-button matTooltip="Actualizar tarifa" type="button" class="btn btn-info" (click)="editarTarifa.emit({objeto:element})"> <i class="material-icons ">edit</i>
+            </button>
+
+          </mat-cell>
+        </ng-container>
+
+      </div>
+      <mat-header-row *matHeaderRowDef="cabecerasColumnas"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: cabecerasColumnas;"></mat-row>
+    </mat-table>
+
+  </div>
+</div>
